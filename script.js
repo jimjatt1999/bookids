@@ -10,7 +10,14 @@ let currentState = {
         age: '',
         gender: '',
         interests: '',
-        appearance: ''
+        appearance: '',
+        food: '',
+        photo: null,
+        additionalCharacters: {
+            sibling: { included: false, name: '', relation: '' },
+            pet: { included: false, name: '', type: '' },
+            friend: { included: false, name: '' }
+        }
     },
     story: {
         title: '',
@@ -22,7 +29,8 @@ let currentState = {
         bookTitle: '',
         format: 'digital',
         price: 14.99,
-        shipping: 0.00
+        shipping: 0.00,
+        merchandise: []
     },
     library: []
 };
@@ -158,6 +166,125 @@ function setupEventListeners() {
         });
     });
 
+    // File upload preview
+    if (document.getElementById('childPhoto')) {
+        document.getElementById('childPhoto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const preview = document.getElementById('photoPreview');
+                    preview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+                currentState.childData.photo = file;
+            }
+        });
+    }
+    
+    // Additional character checkboxes
+    document.querySelectorAll('.character-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const detailsId = this.id.replace('include', '') + 'Details';
+            const detailsDiv = document.getElementById(detailsId);
+            
+            if (this.checked) {
+                detailsDiv.classList.add('active');
+                
+                // Update state
+                const characterType = this.id.replace('include', '').toLowerCase();
+                currentState.childData.additionalCharacters[characterType].included = true;
+            } else {
+                detailsDiv.classList.remove('active');
+                
+                // Update state
+                const characterType = this.id.replace('include', '').toLowerCase();
+                currentState.childData.additionalCharacters[characterType].included = false;
+            }
+        });
+    });
+    
+    // Additional character inputs
+    document.getElementById('siblingName')?.addEventListener('input', function() {
+        currentState.childData.additionalCharacters.sibling.name = this.value;
+    });
+    
+    document.getElementById('siblingRelation')?.addEventListener('change', function() {
+        currentState.childData.additionalCharacters.sibling.relation = this.value;
+    });
+    
+    document.getElementById('petName')?.addEventListener('input', function() {
+        currentState.childData.additionalCharacters.pet.name = this.value;
+    });
+    
+    document.getElementById('petType')?.addEventListener('change', function() {
+        currentState.childData.additionalCharacters.pet.type = this.value;
+    });
+    
+    document.getElementById('friendName')?.addEventListener('input', function() {
+        currentState.childData.additionalCharacters.friend.name = this.value;
+    });
+    
+    // Favorite food input
+    document.getElementById('childFood')?.addEventListener('input', function() {
+        currentState.childData.food = this.value;
+    });
+
+    // Continue to merchandise button
+    document.getElementById('continueToMerchBtn')?.addEventListener('click', function() {
+        // Switch to the merchandise tab
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        document.querySelector('.tab[data-tab="merchandise"]').classList.add('active');
+        document.getElementById('merchandise-tab').classList.add('active');
+    });
+    
+    // Merchandise quantity buttons
+    document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('.quantity-input');
+            const currentValue = parseInt(input.value);
+            if (currentValue < parseInt(input.max)) {
+                input.value = currentValue + 1;
+                updateMerchandiseOrder(input);
+            }
+        });
+    });
+    
+    document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('.quantity-input');
+            const currentValue = parseInt(input.value);
+            if (currentValue > parseInt(input.min)) {
+                input.value = currentValue - 1;
+                updateMerchandiseOrder(input);
+            }
+        });
+    });
+    
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            updateMerchandiseOrder(this);
+        });
+    });
+    
+    // Add bundle button
+    document.getElementById('addBundleBtn')?.addEventListener('click', function() {
+        // Set all merchandise items to 1
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            input.value = 1;
+            updateMerchandiseOrder(input);
+        });
+        
+        // Apply bundle discount
+        currentState.order.merchandise = currentState.order.merchandise.map(item => {
+            return { ...item, price: item.price * 0.8 }; // 20% discount
+        });
+        
+        updateOrderSummary();
+    });
+
     // Onboarding form
     document.getElementById('onboardingForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -168,7 +295,25 @@ function setupEventListeners() {
             age: document.getElementById('childAge').value,
             gender: document.getElementById('childGender').value,
             interests: document.getElementById('childInterests').value,
-            appearance: document.getElementById('childAppearance').value
+            appearance: document.getElementById('childAppearance').value,
+            food: document.getElementById('childFood').value,
+            photo: currentState.childData.photo,
+            additionalCharacters: {
+                sibling: {
+                    included: document.getElementById('includeSibling')?.checked || false,
+                    name: document.getElementById('siblingName')?.value || '',
+                    relation: document.getElementById('siblingRelation')?.value || ''
+                },
+                pet: {
+                    included: document.getElementById('includePet')?.checked || false,
+                    name: document.getElementById('petName')?.value || '',
+                    type: document.getElementById('petType')?.value || ''
+                },
+                friend: {
+                    included: document.getElementById('includeFriend')?.checked || false,
+                    name: document.getElementById('friendName')?.value || ''
+                }
+            }
         };
         
         // Get story type
@@ -316,18 +461,78 @@ function updateLogoutButton() {
     }
 }
 
+// Update merchandise order
+function updateMerchandiseOrder(input) {
+    const quantity = parseInt(input.value);
+    const item = input.dataset.item;
+    const price = parseFloat(input.dataset.price);
+    
+    // Remove existing item from order
+    currentState.order.merchandise = currentState.order.merchandise.filter(
+        merchItem => merchItem.item !== item
+    );
+    
+    // Add item if quantity > 0
+    if (quantity > 0) {
+        currentState.order.merchandise.push({
+            item: item,
+            quantity: quantity,
+            price: price * quantity,
+            unitPrice: price
+        });
+    }
+    
+    updateOrderSummary();
+}
+
 // Update order summary
 function updateOrderSummary() {
     const orderTitle = document.getElementById('orderTitle');
     const orderPrice = document.getElementById('orderPrice');
     const orderShipping = document.getElementById('orderShipping');
     const orderTotal = document.getElementById('orderTotal');
+    const merchandiseItems = document.getElementById('merchandiseItems');
     
+    // Book title and price
     orderTitle.textContent = `${currentState.order.format}: ${currentState.order.bookTitle}`;
     orderPrice.textContent = `$${currentState.order.price.toFixed(2)}`;
-    orderShipping.textContent = `$${currentState.order.shipping.toFixed(2)}`;
     
-    const total = currentState.order.price + currentState.order.shipping;
+    // Calculate shipping based on format and merchandise
+    let shipping = 0;
+    if (currentState.order.format.includes('digital') && !currentState.order.format.includes('bundle')) {
+        shipping = 0;
+    } else {
+        shipping = 4.99;
+    }
+    
+    // Add extra shipping for physical merchandise
+    if (currentState.order.merchandise.length > 0) {
+        shipping = Math.max(shipping, 4.99);
+    }
+    
+    currentState.order.shipping = shipping;
+    orderShipping.textContent = `$${shipping.toFixed(2)}`;
+    
+    // Merchandise items
+    merchandiseItems.innerHTML = '';
+    let merchandiseTotal = 0;
+    
+    currentState.order.merchandise.forEach(item => {
+        const merchItem = document.createElement('div');
+        merchItem.className = 'order-item';
+        
+        const itemName = item.item.charAt(0).toUpperCase() + item.item.slice(1);
+        merchItem.innerHTML = `
+            <span>${itemName} (${item.quantity})</span>
+            <span>$${item.price.toFixed(2)}</span>
+        `;
+        
+        merchandiseItems.appendChild(merchItem);
+        merchandiseTotal += item.price;
+    });
+    
+    // Calculate total
+    const total = currentState.order.price + currentState.order.shipping + merchandiseTotal;
     orderTotal.textContent = `$${total.toFixed(2)}`;
 }
 
@@ -365,14 +570,32 @@ async function generateStory() {
     }
 }
 
-// Build story prompt for LLM
+// Build story prompt for LLM with additional characters and food
 function buildStoryPrompt() {
-    return `Create an illustrated children's story for a ${currentState.childData.age}-year-old ${currentState.childData.gender} named ${currentState.childData.name} who is interested in ${currentState.childData.interests}. 
+    let prompt = `Create an illustrated children's story for a ${currentState.childData.age}-year-old ${currentState.childData.gender} named ${currentState.childData.name} who is interested in ${currentState.childData.interests}. 
     ${currentState.childData.appearance ? `The child looks like: ${currentState.childData.appearance}.` : ''}
+    ${currentState.childData.food ? `The child's favorite food is ${currentState.childData.food}.` : ''}`;
+    
+    // Add additional characters
+    if (currentState.childData.additionalCharacters.sibling.included) {
+        prompt += ` Include the child's ${currentState.childData.additionalCharacters.sibling.relation} named ${currentState.childData.additionalCharacters.sibling.name} as a supporting character.`;
+    }
+    
+    if (currentState.childData.additionalCharacters.pet.included) {
+        prompt += ` Include the child's pet ${currentState.childData.additionalCharacters.pet.type} named ${currentState.childData.additionalCharacters.pet.name} in the story.`;
+    }
+    
+    if (currentState.childData.additionalCharacters.friend.included) {
+        prompt += ` Include the child's friend named ${currentState.childData.additionalCharacters.friend.name} as part of the adventure.`;
+    }
+    
+    prompt += `
     The story should be a ${currentState.story.type} story. 
     Divide the story into 10-12 pages, with each page having text that would fit on a single page of a children's book.
     Include text with varying styles, sizes, and emphasis to make it engaging for children.
     Start with "Once upon a time..." and end with a moral lesson.`;
+    
+    return prompt;
 }
 
 // Call to LLM API (placeholder for future implementation)
@@ -517,6 +740,12 @@ function prepareCheckout() {
     document.getElementById('orderPrice').textContent = `$${currentState.order.price.toFixed(2)}`;
     document.getElementById('orderShipping').textContent = `$${currentState.order.shipping.toFixed(2)}`;
     
+    // Clear any previous merchandise selections
+    currentState.order.merchandise = [];
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.value = 0;
+    });
+    
     const total = currentState.order.price + currentState.order.shipping;
     document.getElementById('orderTotal').textContent = `$${total.toFixed(2)}`;
     
@@ -527,6 +756,12 @@ function prepareCheckout() {
         
         document.querySelector('.tab[data-tab="pricing"]').classList.add('active');
         document.getElementById('pricing-tab').classList.add('active');
+    }
+    
+    // Clear merchandise items display
+    const merchandiseItems = document.getElementById('merchandiseItems');
+    if (merchandiseItems) {
+        merchandiseItems.innerHTML = '';
     }
 }
 
@@ -542,7 +777,28 @@ function processPayment() {
         document.getElementById('confirmationTitle').textContent = currentState.order.bookTitle;
         document.getElementById('confirmationFormat').textContent = currentState.order.format;
         
-        const total = currentState.order.price + currentState.order.shipping;
+        // Display merchandise items
+        const confirmationMerchandise = document.getElementById('confirmationMerchandise');
+        if (confirmationMerchandise) {
+            confirmationMerchandise.innerHTML = '';
+            
+            if (currentState.order.merchandise.length > 0) {
+                currentState.order.merchandise.forEach(item => {
+                    const merchItem = document.createElement('div');
+                    merchItem.className = 'order-item';
+                    
+                    const itemName = item.item.charAt(0).toUpperCase() + item.item.slice(1);
+                    merchItem.textContent = `${itemName} (${item.quantity}) - $${item.price.toFixed(2)}`;
+                    
+                    confirmationMerchandise.appendChild(merchItem);
+                });
+            } else {
+                confirmationMerchandise.innerHTML = '<p><em>No merchandise items selected</em></p>';
+            }
+        }
+        
+        const total = currentState.order.price + currentState.order.shipping + 
+            currentState.order.merchandise.reduce((sum, item) => sum + item.price, 0);
         document.getElementById('confirmationTotal').textContent = `$${total.toFixed(2)}`;
         
         // Navigate to confirmation page
@@ -581,7 +837,15 @@ function resetStoryState() {
         bookTitle: '',
         format: 'digital',
         price: 14.99,
-        shipping: 0.00
+        shipping: 0.00,
+        merchandise: []
+    };
+    
+    // Reset additional characters
+    currentState.childData.additionalCharacters = {
+        sibling: { included: false, name: '', relation: '' },
+        pet: { included: false, name: '', type: '' },
+        friend: { included: false, name: '' }
     };
 }
 
