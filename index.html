@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookids - Personalized Children's Books</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Bubblegum+Sans&family=Patrick+Hand&family=Mali:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Page -->
+        <div id="login" class="page">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-logo">Bookids</div>
+                    <h2>Create personalized stories for your child</h2>
+                    
+                    <div id="loginFormContainer">
+                        <form id="loginForm" class="login-form">
+                            <div class="form-group">
+                                <label for="loginEmail"><i class="fa-solid fa-envelope"></i> Email</label>
+                                <input type="email" id="loginEmail" placeholder="yourname@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword"><i class="fa-solid fa-lock"></i> Password</label>
+                                <input type="password" id="loginPassword" placeholder="••••••••" required>
+                            </div>
+                            <button type="submit" class="btn primary login-btn"><i class="fa-solid fa-right-to-bracket"></i> Log In</button>
+                        </form>
+                        
+                        <div class="separator">
+                            <span>OR</span>
+                        </div>
+                        
+                        <button id="devPassBtn" class="btn secondary login-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> Dev Pass</button>
+                        
+                        <div class="signup-link">
+                            Don't have an account? <a href="#" id="showSignupLink">Sign up</a>
+                        </div>
+                    </div>
+                    
+                    <div id="signupFormContainer" class="hidden">
+                        <form id="signupForm" class="signup-form">
+                            <div class="form-group">
+                                <label for="signupEmail"><i class="fa-solid fa-envelope"></i> Email</label>
+                                <input type="email" id="signupEmail" placeholder="yourname@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupPassword"><i class="fa-solid fa-lock"></i> Password</label>
+                                <input type="password" id="signupPassword" placeholder="••••••••" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupConfirmPassword"><i class="fa-solid fa-check-double"></i> Confirm Password</label>
+                                <input type="password" id="signupConfirmPassword" placeholder="••••••••" required>
+                            </div>
+                            <button type="submit" class="btn primary login-btn"><i class="fa-solid fa-user-plus"></i> Sign Up</button>
+                        </form>
+                        
+                        <div class="login-link">
+                            Already have an account? <a href="#" id="showLoginLink">Log in</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Landing Page -->
+        <div id="landing" class="page">
+            <header class="main-header">
+                <h1 class="main-logo">Bookids</h1>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="#mission"><i class="fa-solid fa-bullseye"></i> Our Mission</a></li>
+                        <li><a href="#about"><i class="fa-solid fa-users"></i> About Us</a></li>
+                        <li><a href="#library"><i class="fa-solid fa-books"></i> Your Library</a></li>
+                        <li><a href="#contact"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+                        <li><button id="logoutBtn" class="btn outline" style="display: none;"><i class="fa-solid fa-sign-out-alt"></i> Log Out</button></li>
+                    </ul>
+                </nav>
+            </header>
+            
+            <section class="hero">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h2>Personalized Books for Cognitive Development</h2>
+                        <p>Create custom stories that feature your child as the main character. Help develop their imagination, boost confidence, and make reading fun!</p>
+                        <button id="getStartedBtn" class="btn primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Create a Story</button>
+                    </div>
+                    <div class="hero-image">
+                        <img src="https://placehold.co/600x400/e2f0ea/4361EE?text=Bookids+Demo" alt="Child reading a personalized book">
+                    </div>
+                </div>
+            </section>
+            
+            <section id="mission" class="mission-section">
+                <h2><i class="fa-solid fa-star"></i> Our Mission</h2>
+                <p>At Bookids, we believe every child deserves to be the hero of their own story. Our personalized books not only make reading more engaging, but they also help develop key cognitive and emotional skills during critical developmental years.</p>
+                <p>By featuring your child in stories that match their interests, we create meaningful connections to reading and inspire a lifelong love of books.</p>
+            </section>
+        </div>
+
+        <!-- Library Page -->
+        <div id="library" class="page">
+            <div class="header">
+                <h1 class="logo">Bookids</h1>
+                <p class="tagline">Your story library</p>
+            </div>
+            
+            <div class="library-container">
+                <div class="library-header">
+                    <h2 class="library-title"><i class="fa-solid fa-books"></i> Your Books</h2>
+                    <button class="btn primary"><i class="fa-solid fa-plus"></i> Create New Story</button>
+                </div>
+                
+                <div class="book-grid">
+                    <!-- Example books -->
+                    <div class="book-card">
+                        <div class="book-thumbnail">
+                            <img src="https://placehold.co/400x500/f0f5ff/4361EE?text=Book" alt="Book thumbnail">
+                        </div>
+                        <div class="book-info">
+                            <h3>Emma's Adventure</h3>
+                            <div class="book-meta">
+                                <span>Feb 12, 2023</span>
+                                <span class="book-type">Adventure</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="book-card">
+                        <div class="book-thumbnail">
+                            <img src="https://placehold.co/400x500/f0f5ff/4ECDC4?text=Book" alt="Book thumbnail">
+                        </div>
+                        <div class="book-info">
+                            <h3>Jack's Space Journey</h3>
+                            <div class="book-meta">
+                                <span>Jan 5, 2023</span>
+                                <span class="book-type">Educational</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="book-card">
+                        <div class="book-thumbnail">
+                            <img src="https://placehold.co/400x500/f0f5ff/FFD166?text=Book" alt="Book thumbnail">
+                        </div>
+                        <div class="book-info">
+                            <h3>Noah's Bedtime Story</h3>
+                            <div class="book-meta">
+                                <span>Dec 20, 2022</span>
+                                <span class="book-type">Bedtime</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onboarding Page -->
+        <div id="onboarding" class="page">
+            <div class="header">
+                <h1 class="logo">Bookids</h1>
+                <p class="tagline">Create a personalized story for your child</p>
+            </div>
+            
+            <div class="container">
+                <div class="card">
+                    <h2><i class="fa-solid fa-child"></i> Tell us about your child</h2>
+                    <p class="privacy-note"><i class="fa-solid fa-shield-halved"></i> We take your child's privacy seriously. All information is securely stored and never shared with third parties.</p>
+                    
+                    <form id="onboardingForm">
+                        <div class="form-group">
+                            <label for="childName"><i class="fa-solid fa-signature"></i> Child's Name</label>
+                            <input type="text" id="childName" placeholder="e.g. Emma" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="childAge"><i class="fa-solid fa-cake-candles"></i> Child's Age</label>
+                                <input type="number" id="childAge" min="1" max="12" placeholder="e.g. 5" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="childGender"><i class="fa-solid fa-venus-mars"></i> Child's Gender</label>
+                                <div class="custom-select-wrapper">
+                                    <select id="childGender" class="custom-select" required>
+                                        <option value="" disabled selected>Select gender</option>
+                                        <option value="boy">Boy</option>
+                                        <option value="girl">Girl</option>
+                                        <option value="neutral">Prefer not to specify</option>
+                                    </select>
+                                    <div class="custom-select-arrow">
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="childInterests"><i class="fa-solid fa-heart"></i> Child's Interests</label>
+                            <input type="text" id="childInterests" placeholder="e.g. space, dinosaurs, princesses" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="childFood"><i class="fa-solid fa-utensils"></i> Favorite Food (Optional)</label>
+                            <input type="text" id="childFood" placeholder="e.g. ice cream, pizza, apples">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="childAppearance"><i class="fa-solid fa-user"></i> Child's Appearance (Optional)</label>
+                            <textarea id="childAppearance" rows="3" placeholder="Describe your child's appearance (hair color, eye color, etc.)"></textarea>
+                        </div>
+                        
+                        <div class="form-group image-upload-container">
+                            <label for="childPhoto"><i class="fa-solid fa-camera"></i> Upload a Photo (Optional)</label>
+                            <div class="file-upload">
+                                <input type="file" id="childPhoto" accept="image/*">
+                                <label for="childPhoto" class="file-upload-btn"><i class="fa-solid fa-upload"></i> Choose a Photo</label>
+                                <div id="photoPreview" class="photo-preview"></div>
+                            </div>
+                            <p class="upload-note">Photo is stored securely and used only for story customization.</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-users"></i> Include Additional Characters</label>
+                            <div class="additional-characters">
+                                <div class="character-option">
+                                    <input type="checkbox" id="includeSibling" class="character-checkbox">
+                                    <label for="includeSibling">Sibling</label>
+                                    <div class="character-details" id="siblingDetails">
+                                        <input type="text" id="siblingName" placeholder="Sibling's name">
+                                        <select id="siblingRelation" class="small-select">
+                                            <option value="brother">Brother</option>
+                                            <option value="sister">Sister</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="character-option">
+                                    <input type="checkbox" id="includePet" class="character-checkbox">
+                                    <label for="includePet">Pet</label>
+                                    <div class="character-details" id="petDetails">
+                                        <input type="text" id="petName" placeholder="Pet's name">
+                                        <select id="petType" class="small-select">
+                                            <option value="dog">Dog</option>
+                                            <option value="cat">Cat</option>
+                                            <option value="rabbit">Rabbit</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="character-option">
+                                    <input type="checkbox" id="includeFriend" class="character-checkbox">
+                                    <label for="includeFriend">Friend</label>
+                                    <div class="character-details" id="friendDetails">
+                                        <input type="text" id="friendName" placeholder="Friend's name">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="storyType"><i class="fa-solid fa-book"></i> Story Type</label>
+                            <div class="custom-select-wrapper">
+                                <select id="storyType" class="custom-select" required>
+                                    <option value="adventure">Adventure</option>
+                                    <option value="educational">Educational</option>
+                                    <option value="bedtime">Bedtime Story</option>
+                                    <option value="fantasy">Fantasy</option>
+                                    <option value="superhero">Superhero</option>
+                                </select>
+                                <div class="custom-select-arrow">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Create Story</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Page -->
+        <div id="loading" class="page">
+            <div class="header">
+                <h1 class="logo">Bookids</h1>
+                <p class="tagline">Creating your personalized story</p>
+            </div>
+            
+            <div class="container">
+                <div class="card loading-container">
+                    <h2><i class="fa-solid fa-pen-fancy"></i> Creating a unique story for your child</h2>
+                    <p>Our AI is crafting a personalized adventure featuring your child. This will take just a moment...</p>
+                    
+                    <div class="loading-animation">
+                        <div class="book">
+                            <div class="book-page"></div>
+                            <div class="book-page"></div>
+                        </div>
+                    </div>
+                    
+                    <p class="loading-text">Writing a magical story...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Book Preview Page -->
+        <div id="preview" class="page">
+            <div class="header">
+                <h1 class="logo">Bookids</h1>
+                <p class="tagline">Your personalized story</p>
+            </div>
+            
+            <div class="book-preview-container">
+                <h2 id="storyTitle" class="story-title"><i class="fa-solid fa-book-open"></i> Alex's Adventure</h2>
+                
+                <div class="storybook">
+                    <div class="book-wrapper">
+                        <div class="book-pages">
+                            <div class="book-page-content">
+                                <div id="pageContent" class="page-content">
+                                    <!-- Enhanced story text with varying styles -->
+                                    <p><span class="story-text highlight-yellow">Once upon a time...</span> there was a brave child named <span class="story-text highlight-blue">Alex</span> who loved space and dinosaurs. Every night before bed, <span class="story-text highlight-green">Alex</span> would dream of exciting adventures.</p>
+                                    <p>One night, as <span class="story-text highlight-pink">Alex</span> was fast asleep, a magical shooting star streaked across the sky and stopped right outside the bedroom window.</p>
+                                </div>
+                                <div class="page-image">
+                                    <p><i class="fa-solid fa-image fa-2x"></i></p>
+                                    <p>Image will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="page-controls">
+                            <button id="prevPageBtn" class="page-btn" disabled>
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <div id="pageIndicator">Page 1 of 10</div>
+                            <button id="nextPageBtn" class="page-btn">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button id="checkoutBtn" class="btn primary"><i class="fa-solid fa-cart-shopping"></i> Order This Book</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout Page -->
+        <div id="checkout" class="page">
+            <div class="header">
+                <h1 class="logo">Bookids</h1>
+                <p class="tagline">Complete your order</p>
+            </div>
+            
+            <div class="container">
+                <div class="card checkout-card">
+                    <h2><i class="fa-solid fa-credit-card"></i> Checkout</h2>
+                    
+                    <div class="tabs">
+                        <div class="tab active" data-tab="pricing">Book Options</div>
+                        <div class="tab" data-tab="merchandise">Merchandise</div>
+                        <div class="tab" data-tab="payment">Payment Details</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="pricing-tab">
+                        <h3>Choose Your Book Format</h3>
+                        <div class="pricing-options">
+                            <div class="pricing-option selected">
+                                <div class="pricing-title">Digital Book</div>
+                                <div class="pricing-price">$14.99</div>
+                                <ul class="pricing-features">
+                                    <li><i class="fa-solid fa-check"></i> Instant delivery</li>
+                                    <li><i class="fa-solid fa-check"></i> Interactive pages</li>
+                                    <li><i class="fa-solid fa-check"></i> Read on any device</li>
+                                    <li><i class="fa-solid fa-check"></i> Never expires</li>
+                                </ul>
+                                <button class="btn outline">Selected</button>
+                            </div>
+                            
+                            <div class="pricing-option">
+                                <div class="pricing-title">Printed Book</div>
+                                <div class="pricing-price">$29.99</div>
+                                <ul class="pricing-features">
+                                    <li><i class="fa-solid fa-check"></i> Physical book</li>
+                                    <li><i class="fa-solid fa-check"></i> Premium color print</li>
+                                    <li><i class="fa-solid fa-check"></i> Hardcover binding</li>
+                                    <li><i class="fa-solid fa-check"></i> Ships in 3-5 days</li>
+                                </ul>
+                                <button class="btn primary">Select</button>
+                            </div>
+                            
+                            <div class="pricing-option">
+                                <div class="pricing-title">Complete Bundle</div>
+                                <div class="pricing-price">$39.99</div>
+                                <ul class="pricing-features">
+                                    <li><i class="fa-solid fa-check"></i> Digital + Printed book</li>
+                                    <li><i class="fa-solid fa-check"></i> Instant digital access</li>
+                                    <li><i class="fa-solid fa-check"></i> Premium hardcover</li>
+                                    <li><i class="fa-solid fa-check"></i> 15% savings</li>
+                                </ul>
+                                <button class="btn primary">Select</button>
+                            </div>
+                        </div>
+                        
+                        <button class="btn primary" id="continueToMerchBtn">Continue to Merchandise</button>
+                    </div>
+                    
+                    <div class="tab-content" id="merchandise-tab">
+                        <h3>Add Merchandise from Your Story</h3>
+                        <p class="merchandise-intro">Extend the magic of your story with these custom items featuring characters from your book!</p>
+                        
+                        <div class="merchandise-grid">
+                            <div class="merchandise-item">
+                                <div class="merch-image">
+                                    <img src="https://placehold.co/300x300/f0f5ff/4361EE?text=Coloring+Book" alt="Coloring Book">
+                                </div>
+                                <div class="merch-info">
+                                    <h4>Custom Coloring Book</h4>
+                                    <p>12 pages of illustrations from the story for your child to color</p>
+                                    <div class="merch-price">$9.99</div>
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn minus">-</button>
+                                        <input type="number" class="quantity-input" value="0" min="0" max="5" data-item="coloring" data-price="9.99">
+                                        <button class="quantity-btn plus">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="merchandise-item">
+                                <div class="merch-image">
+                                    <img src="https://placehold.co/300x300/f0f5ff/4ECDC4?text=Puzzle" alt="Puzzle">
+                                </div>
+                                <div class="merch-info">
+                                    <h4>Story Puzzle</h4>
+                                    <p>24-piece puzzle featuring a scene from your child's story</p>
+                                    <div class="merch-price">$12.99</div>
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn minus">-</button>
+                                        <input type="number" class="quantity-input" value="0" min="0" max="5" data-item="puzzle" data-price="12.99">
+                                        <button class="quantity-btn plus">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="merchandise-item">
+                                <div class="merch-image">
+                                    <img src="https://placehold.co/300x300/f0f5ff/FFD166?text=Pencil+Set" alt="Pencil Set">
+                                </div>
+                                <div class="merch-info">
+                                    <h4>Character Pencil Set</h4>
+                                    <p>Set of 5 pencils featuring characters from the story</p>
+                                    <div class="merch-price">$7.99</div>
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn minus">-</button>
+                                        <input type="number" class="quantity-input" value="0" min="0" max="5" data-item="pencils" data-price="7.99">
+                                        <button class="quantity-btn plus">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="merchandise-item">
+                                <div class="merch-image">
+                                    <img src="https://placehold.co/300x300/f0f5ff/FF6B6B?text=Backpack" alt="Backpack">
+                                </div>
+                                <div class="merch-info">
+                                    <h4>Character Backpack</h4>
+                                    <p>Child-sized backpack featuring the main character</p>
+                                    <div class="merch-price">$24.99</div>
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn minus">-</button>
+                                        <input type="number" class="quantity-input" value="0" min="0" max="5" data-item="backpack" data-price="24.99">
+                                        <button class="quantity-btn plus">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bundle-offer">
+                            <div class="bundle-badge">SAVE 20%</div>
+                            <h4>Complete Merchandise Bundle</h4>
+                            <p>Get all 4 items at a discounted price!</p>
+                            <div class="bundle-price">$44.99 <span class="original-price">$55.96</span></div>
+                            <button class="btn primary" id="addBundleBtn">Add Bundle to Cart</button>
+                        </div>
+                        
+                        <div class="order-summary">
+                            <h3><i class="fa-solid fa-receipt"></i> Order Summary</h3>
+                            <div class="order-item">
+                                <span id="orderTitle">Digital Book: Alex's Adventure</span>
+                                <span id="orderPrice">$14.99</span>
+                            </div>
+                            <div id="merchandiseItems">
+                                <!-- Merchandise items will be added here dynamically -->
+                            </div>
+                            <div class="order-item">
+                                <span>Shipping</span>
+                                <span id="orderShipping">$0.00</span>
+                            </div>
+                            <div class="order-total">
+                                <span>Total</span>
+                                <span id="orderTotal">$14.99</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn primary" id="continueToPaymentBtn">Continue to Payment</button>
+                    </div>
+                    
+                    <div class="tab-content" id="payment-tab">
+                        <div class="payment-form">
+                            <h3><i class="fa-solid fa-lock"></i> Payment Information</h3>
+                            <form id="paymentForm">
+                                <div class="form-group">
+                                    <label for="cardName"><i class="fa-solid fa-user"></i> Name on Card</label>
+                                    <input type="text" id="cardName" placeholder="e.g. John Smith" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="cardNumber"><i class="fa-solid fa-credit-card"></i> Card Number</label>
+                                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" required>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="cardExpiry"><i class="fa-regular fa-calendar"></i> Expiry Date</label>
+                                        <input type="text" id="cardExpiry" placeholder="MM/YY" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="cardCvv"><i class="fa-solid fa-shield"></i> CVV</label>
+                                        <input type="text" id="cardCvv" placeholder="123" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="shippingAddress"><i class="fa-solid fa-truck"></i> Shipping Address</label>
+                                    <textarea id="shippingAddress" rows="3" placeholder="Enter your full shipping address" required></textarea>
+                                </div>
+                                
+                                <div class="privacy-agreement">
+                                    <input type="checkbox" id="privacyConsent" required>
+                                    <label for="privacyConsent">I agree that my personal and child's information will be processed securely in accordance with the <a href="#">Privacy Policy</a>.</label>
+                                </div>
+                                
+                                <button type="submit" class="btn primary"><i class="fa-solid fa-check"></i> Place Order</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Confirmation Page -->
+        <div id="confirmation" class="page">
+            <div class="header">
+                <h1 class="logo">Bookids</h1>
+                <p class="tagline">Order Confirmed</p>
+            </div>
+            
+            <div class="container">
+                <div class="card confirmation-card">
+                    <div class="success-icon">
+                        <i class="fa-solid fa-circle-check fa-5x"></i>
+                    </div>
+                    
+                    <h2>Thank You for Your Order!</h2>
+                    <p>Your personalized book and merchandise will be delivered shortly. We've added the book to your library where you can access it anytime.</p>
+                    
+                    <div class="order-details">
+                        <h3><i class="fa-solid fa-list"></i> Order Details</h3>
+                        <p><strong><i class="fa-solid fa-child"></i> Child's Name:</strong> <span id="confirmationName">Alex</span></p>
+                        <p><strong><i class="fa-solid fa-book"></i> Book Title:</strong> <span id="confirmationTitle">Alex's Adventure</span></p>
+                        <p><strong><i class="fa-solid fa-file-invoice"></i> Format:</strong> <span id="confirmationFormat">Digital Book</span></p>
+                        <div id="confirmationMerchandise">
+                            <!-- Merchandise items will be added here dynamically -->
+                        </div>
+                        <p><strong><i class="fa-solid fa-tag"></i> Total:</strong> <span id="confirmationTotal">$14.99</span></p>
+                    </div>
+                    
+                    <div class="download-options">
+                        <button id="viewLibraryBtn" class="btn secondary"><i class="fa-solid fa-books"></i> View in Library</button>
+                        <button id="createAnotherBtn" class="btn primary"><i class="fa-solid fa-plus"></i> Create Another Book</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
