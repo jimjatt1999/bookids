@@ -1534,10 +1534,12 @@ function initializeFullscreenReader() {
         const audioButton = document.createElement('button');
         audioButton.className = 'book-action-btn listen';
         audioButton.innerHTML = `
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-            Listen
+            <span class="btn-label">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                Listen
+            </span>
         `;
         audioButton.addEventListener('click', toggleAudio);
         
@@ -2017,16 +2019,18 @@ async function generateSpeech(apiKey, text, voice = 'alloy') {
     }
 
     try {
-        // First check if we have this audio cached
-        const cacheKey = `tts_cache_${voice}_${text.substring(0, 100)}`;
+        // Create a more reliable cache key using text content hash
+        const cacheKey = `tts_cache_${voice}_${hashText(text)}`;
+        
+        // Check if we have this audio cached
         const cachedAudio = localStorage.getItem(cacheKey);
         
         if (cachedAudio) {
-            console.log('Using cached audio');
+            console.log('Using cached audio - saving API costs');
             return cachedAudio;
         }
         
-        console.log('Generating TTS with OpenAI...');
+        console.log('Generating TTS with OpenAI API - this will use your API credits');
         
         const response = await fetch('https://api.openai.com/v1/audio/speech', {
             method: 'POST',
@@ -2056,11 +2060,36 @@ async function generateSpeech(apiKey, text, voice = 'alloy') {
                 // This is the base64 string
                 const base64Audio = reader.result;
                 
-                // Cache the audio for future use
+                // Manage cache before storing new item
                 try {
+                    // Clean up old cache items if needed
+                    cleanupAudioCache();
+                    
+                    // Cache the audio for future use
                     localStorage.setItem(cacheKey, base64Audio);
+                    
+                    // Store cache keys for management
+                    const cacheRegistry = JSON.parse(localStorage.getItem('audio_cache_registry') || '[]');
+                    cacheRegistry.push({
+                        key: cacheKey,
+                        timestamp: Date.now(),
+                        size: base64Audio.length
+                    });
+                    localStorage.setItem('audio_cache_registry', JSON.stringify(cacheRegistry));
+                    
+                    console.log(`Audio cached successfully (${Math.round(base64Audio.length / 1024)}KB)`);
                 } catch (e) {
-                    console.warn('Failed to cache audio, probably due to size constraints:', e);
+                    console.warn('Failed to cache audio:', e);
+                    // If storage is full, clear some old cache items and try again
+                    if (e.name === 'QuotaExceededError') {
+                        cleanupAudioCache(true);
+                        try {
+                            localStorage.setItem(cacheKey, base64Audio);
+                            console.log('Audio cached successfully after cleanup');
+                        } catch (e2) {
+                            console.error('Still unable to cache audio after cleanup:', e2);
+                        }
+                    }
                 }
                 
                 resolve(base64Audio);
@@ -2075,23 +2104,186 @@ async function generateSpeech(apiKey, text, voice = 'alloy') {
     }
 }
 
+// Create a simple hash from text to use as cache key
+function hashText(text) {
+    let hash = 0;
+    if (text.length === 0) return hash;
+    
+    for (let i = 0; i < text.length; i++) {
+        const char = text.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    
+    // Return as positive hex string
+    return Math.abs(hash).toString(16);
+}
+
+// Clean up old audio cache items to prevent storage limit issues
+function cleanupAudioCache(forceCleanup = false) {
+    try {
+        const cacheRegistry = JSON.parse(localStorage.getItem('audio_cache_registry') || '[]');
+        
+        // If no registry or not enough items, exit early
+        if (cacheRegistry.length < 5 && !forceCleanup) return;
+        
+        // Sort by timestamp (oldest first)
+        cacheRegistry.sort((a, b) => a.timestamp - b.timestamp);
+        
+        // If forced cleanup or too many items, remove oldest items
+        const itemsToKeep = forceCleanup ? 
+            Math.floor(cacheRegistry.length / 2) : // Keep half the items when forced
+            Math.max(cacheRegistry.length - 10, 0); // Keep only the 10 most recent otherwise
+        
+        const itemsToRemove = cacheRegistry.splice(0, cacheRegistry.length - itemsToKeep);
+        
+        // Remove the actual cached items
+        itemsToRemove.forEach(item => {
+            localStorage.removeItem(item.key);
+            console.log(`Removed old cached audio: ${item.key}`);
+        });
+        
+        // Update the registry
+        localStorage.setItem('audio_cache_registry', JSON.stringify(cacheRegistry));
+        
+        console.log(`Audio cache cleaned up: removed ${itemsToRemove.length} items, kept ${cacheRegistry.length} items`);
+    } catch (error) {
+        console.error('Error cleaning up audio cache:', error);
+    }
+}
+
+// Update the audio button structure to include progress bar
+function updateAudioButtonState() {
+    const audioPlayer = document.getElementById('tts-audio-player');
+    const audioButtons = document.querySelectorAll('.book-action-btn.listen');
+    
+    audioButtons.forEach(btn => {
+        if (!audioPlayer || audioPlayer.paused) {
+            // Play state
+            btn.innerHTML = `
+                <span class="btn-label">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Listen
+                </span>
+            `;
+            btn.classList.remove('playing');
+            btn.disabled = false;
+            btn.setAttribute('data-playing', 'false');
+        } else {
+            // Pause state with progress bar
+            let timeDisplay = '';
+            if (audioPlayer.duration) {
+                const currentTime = formatTime(audioPlayer.currentTime);
+                const duration = formatTime(audioPlayer.duration);
+                timeDisplay = `<span class="audio-time">${currentTime}</span>`;
+            }
+            
+            btn.innerHTML = `
+                <span class="btn-label">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                    Pause${timeDisplay}
+                </span>
+                <div class="audio-progress-container">
+                    <div class="audio-progress-bar"></div>
+                </div>
+            `;
+            btn.classList.add('playing');
+            btn.disabled = false;
+            btn.setAttribute('data-playing', 'true');
+            
+            // Start updating the progress bar
+            startProgressBarUpdates();
+        }
+    });
+}
+
+// Format time in MM:SS format
+function formatTime(seconds) {
+    if (isNaN(seconds)) return '0:00';
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+// Update progress bar for audio playback
+function startProgressBarUpdates() {
+    if (window.progressInterval) {
+        clearInterval(window.progressInterval);
+    }
+    
+    const audioPlayer = document.getElementById('tts-audio-player');
+    if (!audioPlayer) return;
+    
+    window.progressInterval = setInterval(() => {
+        if (audioPlayer.paused) {
+            clearInterval(window.progressInterval);
+            window.progressInterval = null;
+            return;
+        }
+        
+        // Update progress bar
+        const progressBars = document.querySelectorAll('.audio-progress-bar');
+        const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+        
+        progressBars.forEach(bar => {
+            bar.style.width = `${progressPercent}%`;
+        });
+        
+        // Update time display
+        const timeDisplays = document.querySelectorAll('.audio-time');
+        timeDisplays.forEach(display => {
+            display.textContent = formatTime(audioPlayer.currentTime);
+        });
+    }, 100);
+}
+
 // Play TTS audio for a story paragraph
 async function playStoryAudio(paragraph, apiKey) {
     // Show loading state
-    const audioButton = document.querySelector('.audio-play-btn') || document.querySelector('.fullscreen-audio-btn');
-    if (audioButton) {
-        audioButton.innerHTML = `
-            <svg class="loading-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
-                <path d="M12 2a10 10 0 0 1 10 10" opacity="1" class="loading-circle"></path>
-            </svg>
-            Loading...
+    const audioButtons = document.querySelectorAll('.book-action-btn.listen');
+    audioButtons.forEach(btn => {
+        btn.innerHTML = `
+            <span class="btn-label">
+                <svg class="loading-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
+                    <path d="M12 2a10 10 0 0 1 10 10" opacity="1" class="loading-circle"></path>
+                </svg>
+                Loading...
+            </span>
         `;
-        audioButton.disabled = true;
-    }
+        btn.disabled = true;
+    });
     
     try {
-        // Generate the audio
+        // Check if audio is cached first
+        const cacheKey = `tts_cache_alloy_${hashText(paragraph)}`;
+        const cachedAudio = localStorage.getItem(cacheKey);
+        
+        if (cachedAudio) {
+            // If cached, update button to show we're using cached audio
+            audioButtons.forEach(btn => {
+                btn.innerHTML = `
+                    <span class="btn-label">
+                        <svg class="cached-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                        Using cached audio
+                    </span>
+                `;
+            });
+            
+            // Short delay to show the cached message
+            await new Promise(resolve => setTimeout(resolve, 700));
+        }
+        
+        // Generate the audio (or get from cache)
         const audioData = await generateSpeech(apiKey, paragraph);
         
         if (!audioData) {
@@ -2110,11 +2302,15 @@ async function playStoryAudio(paragraph, apiKey) {
             audioPlayer.addEventListener('play', updateAudioButtonState);
             audioPlayer.addEventListener('pause', updateAudioButtonState);
             audioPlayer.addEventListener('ended', updateAudioButtonState);
+            audioPlayer.addEventListener('loadedmetadata', setupProgressBarClickHandlers);
         }
         
         // Set source and play
         audioPlayer.src = audioData;
         audioPlayer.play();
+        
+        // Setup progress bar click handlers after audio is loaded
+        setupProgressBarClickHandlers();
         
         // Update button state
         updateAudioButtonState();
@@ -2122,61 +2318,63 @@ async function playStoryAudio(paragraph, apiKey) {
     } catch (error) {
         console.error('Error playing audio:', error);
         showErrorMessage(`❌ Audio Generation Error\n\nFailed to generate audio: ${error.message}\n\nPlease check your API key and try again.`);
-    }
-    
-    // Reset button state
-    if (audioButton) {
-        updateAudioButtonState();
+        
+        // Reset buttons on error
+        audioButtons.forEach(btn => {
+            btn.innerHTML = `
+                <span class="btn-label">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Listen
+                </span>
+            `;
+            btn.disabled = false;
+        });
     }
 }
 
-// Update the audio button state based on player status
-function updateAudioButtonState() {
+// Setup click handlers for seeking in the audio
+function setupProgressBarClickHandlers() {
     const audioPlayer = document.getElementById('tts-audio-player');
-    const audioButtons = document.querySelectorAll('.audio-play-btn, .fullscreen-audio-btn');
+    if (!audioPlayer) return;
     
-    audioButtons.forEach(btn => {
-        if (!audioPlayer || audioPlayer.paused) {
-            btn.innerHTML = `
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-                Listen
-            `;
-            btn.disabled = false;
-            btn.setAttribute('data-playing', 'false');
-        } else {
-            btn.innerHTML = `
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="6" y="4" width="4" height="16"></rect>
-                    <rect x="14" y="4" width="4" height="16"></rect>
-                </svg>
-                Pause
-            `;
-            btn.disabled = false;
-            btn.setAttribute('data-playing', 'true');
-        }
+    // Add click event listeners to all progress bar containers
+    const progressContainers = document.querySelectorAll('.audio-progress-container');
+    progressContainers.forEach(container => {
+        // Remove existing listeners to avoid duplicates
+        container.removeEventListener('click', handleProgressClick);
+        
+        // Add new listener
+        container.addEventListener('click', handleProgressClick);
     });
 }
 
-// Play audio for the standard view
-function playCurrentPageAudio() {
-    // Make sure we have story pagination data
-    if (!window.storyPagination) return;
+// Handle click on progress bar for seeking
+function handleProgressClick(event) {
+    const audioPlayer = document.getElementById('tts-audio-player');
+    if (!audioPlayer || !audioPlayer.duration) return;
     
-    const currentPage = window.storyPagination.currentPage;
-    const paragraph = window.storyPagination.paragraphs[currentPage];
-    const apiKey = document.getElementById('openai-key')?.value;
+    // Calculate click position as a percentage of the progress bar width
+    const container = event.currentTarget;
+    const clickPosition = event.offsetX / container.offsetWidth;
     
-    if (paragraph && apiKey) {
-        playStoryAudio(paragraph, apiKey);
-    } else {
-        showErrorMessage('❌ Error\n\nAPI key not found. Please make sure you entered your OpenAI API key.');
+    // Set audio time to corresponding position
+    audioPlayer.currentTime = clickPosition * audioPlayer.duration;
+    
+    // Update progress bar immediately
+    const progressBar = container.querySelector('.audio-progress-bar');
+    if (progressBar) {
+        progressBar.style.width = `${clickPosition * 100}%`;
     }
 }
 
 // Function to toggle audio playback
-function toggleAudio() {
+function toggleAudio(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    
     const audioPlayer = document.getElementById('tts-audio-player');
     
     // If player is playing, pause it
@@ -2203,5 +2401,21 @@ function toggleAudio() {
     } else {
         // Standard view - play the current page's audio
         playCurrentPageAudio();
+    }
+}
+
+// Play audio for the standard view
+function playCurrentPageAudio() {
+    // Make sure we have story pagination data
+    if (!window.storyPagination) return;
+    
+    const currentPage = window.storyPagination.currentPage;
+    const paragraph = window.storyPagination.paragraphs[currentPage];
+    const apiKey = document.getElementById('openai-key')?.value;
+    
+    if (paragraph && apiKey) {
+        playStoryAudio(paragraph, apiKey);
+    } else {
+        showErrorMessage('❌ Error\n\nAPI key not found. Please make sure you entered your OpenAI API key.');
     }
 } 

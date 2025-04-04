@@ -325,11 +325,13 @@
                             </div>
                             
                             <div class="book-action-buttons">
-                                <button class="book-action-btn listen" onclick="toggleAudio()">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                    </svg>
-                                    Listen
+                                <button class="book-action-btn listen" onclick="toggleAudio(event)">
+                                    <span class="btn-label">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                        </svg>
+                                        Listen
+                                    </span>
                                 </button>
                                 <button class="book-action-btn export" onclick="exportToPDF()">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

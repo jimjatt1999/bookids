@@ -2121,4 +2121,61 @@ small a:hover {
 
 .export-pdf-btn {
     display: none; /* Hide the old button */
+}
+
+/* Enhanced audio player for Listen button */
+.audio-progress-container {
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+    width: 100%;
+    cursor: pointer;
+    display: none;
+}
+
+.audio-progress-bar {
+    height: 100%;
+    background-color: white;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.book-action-btn.listen.playing {
+    padding-bottom: 14px;
+}
+
+.book-action-btn.listen.playing .audio-progress-container {
+    display: block;
+}
+
+.book-action-btn.listen.playing .btn-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.audio-time {
+    font-size: 10px;
+    opacity: 0.9;
+    margin-left: 2px;
+}
+
+/* Position audio player in fullscreen mode */
+.fullscreen-reader .book-action-buttons {
+    bottom: 20px;
+    right: 20px;
+}
+
+/* Animation for cached icon */
+@keyframes cacheLoaded {
+    0% { transform: rotate(0deg); opacity: 0.7; }
+    50% { transform: rotate(180deg); opacity: 1; }
+    100% { transform: rotate(360deg); opacity: 0.7; }
+}
+
+.cached-icon {
+    animation: cacheLoaded 1.2s ease-in-out;
+    color: #4CAF50;
 } 
