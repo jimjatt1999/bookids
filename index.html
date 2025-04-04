@@ -22,7 +22,7 @@
                     <img src="icons/search.svg" alt="Library" class="menu-icon">
                     <span>Library</span>
                 </div>
-                <div class="menu-item">
+                <div class="menu-item" onclick="showDashboard()">
                     <img src="icons/dashboard.svg" alt="Dashboard" class="menu-icon">
                     <span>Dashboard</span>
                 </div>
@@ -272,13 +272,6 @@
             </div>
             
             <div id="story-result" class="content-panel" style="display: none;">
-                <div class="back-button" onclick="showArtStyles()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M19 12H5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 19L5 12L12 5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                
                 <div class="book-container">
                     <div class="book-cover">
                         <h2 id="story-title">Alexander's Adventure</h2>
@@ -298,17 +291,57 @@
                         </div>
                     </div>
                     
-                    <div class="story-details">
-                        <h3>Cognitive Development Goals</h3>
-                        <div id="cognitive-details" class="cognitive-details">
-                            <!-- Populated by JavaScript -->
+                    <div class="book-details-wrapper">
+                        <div class="story-details">
+                            <h3>Characters</h3>
+                            <div id="character-profiles" class="character-profiles">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                            
+                            <h3>Cognitive Development Goals</h3>
+                            <div id="cognitive-details" class="cognitive-details">
+                                <!-- Populated by JavaScript -->
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="story-controls">
-                        <button class="read-now-button">Read Now</button>
-                        <button class="save-button" onclick="saveToLibrary()">Save to Library</button>
-                        <button class="create-new-button" id="create-new-story">Create New Story</button>
+                        
+                        <div class="story-controls-wrapper">
+                            <div class="pagination-controls">
+                                <button id="prev-page" class="page-nav-btn" disabled>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M15 18l-6-6 6-6"></path>
+                                    </svg>
+                                </button>
+                                <button id="next-page" class="page-nav-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M9 18l6-6-6-6"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <div class="story-controls">
+                                <button class="read-now-button">Read Now</button>
+                                <button class="save-button" onclick="saveToLibrary()">Save to Library</button>
+                                <button class="create-new-button" id="create-new-story">Create New Story</button>
+                            </div>
+                            
+                            <div class="book-action-buttons">
+                                <button class="book-action-btn listen" onclick="toggleAudio()">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    Listen
+                                </button>
+                                <button class="book-action-btn export" onclick="exportToPDF()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
+                                        <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path>
+                                        <path d="M12 17v-6"></path>
+                                        <path d="M9 14l3 3 3-3"></path>
+                                    </svg>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -325,6 +358,69 @@
                 
                 <div id="library-grid" class="library-grid">
                     <!-- Populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="content-panel" style="display: none;">
+                <h1>Your Dashboard</h1>
+                <p class="subtitle">Track your child's cognitive development progress</p>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card stats-card">
+                        <h3>Your Stats</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="total-books">0</div>
+                                <div class="stat-label">Total Books</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="characters-created">0</div>
+                                <div class="stat-label">Characters</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="favorite-style">-</div>
+                                <div class="stat-label">Favorite Style</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card cognitive-progress-card">
+                        <h3>Cognitive Development Focus</h3>
+                        <div id="cognitive-progress" class="cognitive-progress">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card recent-activity-card">
+                        <h3>Recent Activity</h3>
+                        <div id="recent-activity" class="recent-activity">
+                            <div class="empty-state">
+                                <p>No recent activity yet</p>
+                                <button class="primary-button small" onclick="showMainPage()">Create a Story</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card recommendations-card">
+                        <h3>Recommendations</h3>
+                        <div class="recommendations">
+                            <div class="recommendation-item">
+                                <div class="recommendation-icon">🧠</div>
+                                <div class="recommendation-content">
+                                    <h4>Problem Solving</h4>
+                                    <p>Try creating a story focused on problem-solving skills next to help develop critical thinking.</p>
+                                </div>
+                            </div>
+                            <div class="recommendation-item">
+                                <div class="recommendation-icon">🔤</div>
+                                <div class="recommendation-content">
+                                    <h4>Language Development</h4>
+                                    <p>Consider stories that introduce new vocabulary and language concepts.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
