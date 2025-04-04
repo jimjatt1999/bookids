@@ -1,853 +1,1093 @@
-// Config options
-const USE_REAL_LLM = false;  // Set to true to use real LLM API requests
-
-// State management
-let currentState = {
-    loggedIn: false,
-    user: null,
-    childData: {
-        name: '',
-        age: '',
-        gender: '',
-        interests: '',
-        appearance: '',
-        food: '',
-        photo: null,
-        additionalCharacters: {
-            sibling: { included: false, name: '', relation: '' },
-            pet: { included: false, name: '', type: '' },
-            friend: { included: false, name: '' }
-        }
-    },
-    story: {
-        title: '',
-        type: '',
-        content: [],
-        currentPage: 0
-    },
-    order: {
-        bookTitle: '',
-        format: 'digital',
-        price: 14.99,
-        shipping: 0.00,
-        merchandise: []
-    },
-    library: []
-};
-
 // DOM Elements
-const pages = {
-    login: document.getElementById('login'),
-    landing: document.getElementById('landing'),
-    library: document.getElementById('library'),
-    onboarding: document.getElementById('onboarding'),
-    loading: document.getElementById('loading'),
-    preview: document.getElementById('preview'),
-    checkout: document.getElementById('checkout'),
-    confirmation: document.getElementById('confirmation')
-};
-
-// Navigation
-function navigateTo(pageId) {
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
-    document.getElementById(pageId).classList.add('active');
-    window.scrollTo(0, 0);
-}
-
-// Initialize app
-function initApp() {
-    setupEventListeners();
-    setupCustomSelects();
-    navigateTo('login');
-}
-
-// Set up custom select dropdowns
-function setupCustomSelects() {
-    document.querySelectorAll('.custom-select').forEach(select => {
-        select.addEventListener('change', function() {
-            // Update the selected option text if needed
-        });
-    });
-}
-
-// Set up all event listeners
-function setupEventListeners() {
-    // Login form submit
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        
-        if (email && password) {
-            currentState.loggedIn = true;
-            currentState.user = { email };
-            navigateTo('landing');
-            updateLogoutButton();
-        }
-    });
+document.addEventListener('DOMContentLoaded', () => {
+    // Age slider
+    const ageSlider = document.getElementById('age-slider');
+    const ageValue = document.querySelector('.slider-value');
     
-    // Dev pass button
-    document.getElementById('devPassBtn').addEventListener('click', function() {
-        currentState.loggedIn = true;
-        currentState.user = { email: 'dev@example.com' };
-        navigateTo('landing');
-        updateLogoutButton();
-    });
-    
-    // Signup toggle
-    document.getElementById('showSignupLink').addEventListener('click', function(e) {
-        e.preventDefault();
-        document.getElementById('loginFormContainer').classList.add('hidden');
-        document.getElementById('signupFormContainer').classList.remove('hidden');
-    });
-    
-    // Login toggle
-    document.getElementById('showLoginLink').addEventListener('click', function(e) {
-        e.preventDefault();
-        document.getElementById('signupFormContainer').classList.add('hidden');
-        document.getElementById('loginFormContainer').classList.remove('hidden');
-    });
-    
-    // Signup form submit
-    document.getElementById('signupForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        
-        if (email && password) {
-            currentState.loggedIn = true;
-            currentState.user = { email };
-            navigateTo('landing');
-            updateLogoutButton();
-        }
-    });
-    
-    // Logout button
-    document.getElementById('logoutBtn').addEventListener('click', function() {
-        currentState.loggedIn = false;
-        currentState.user = null;
-        navigateTo('login');
-    });
-
-    // Get Started / Create a Story button
-    document.getElementById('getStartedBtn').addEventListener('click', function() {
-        if (!currentState.loggedIn) {
-            navigateTo('login');
-        } else {
-            navigateTo('onboarding');
-        }
-    });
-    
-    // Library nav link
-    document.querySelector('a[href="#library"]').addEventListener('click', function(e) {
-        e.preventDefault();
-        if (!currentState.loggedIn) {
-            navigateTo('login');
-        } else {
-            navigateTo('library');
-        }
-    });
-    
-    // Create New Story button in library
-    if (document.querySelector('.library-header .btn')) {
-        document.querySelector('.library-header .btn').addEventListener('click', function() {
-            navigateTo('onboarding');
+    if (ageSlider) {
+        ageSlider.addEventListener('input', () => {
+            ageValue.textContent = ageSlider.value;
         });
     }
     
-    // Book cards in library
-    document.querySelectorAll('.book-card').forEach(card => {
-        card.addEventListener('click', function() {
-            // In a real app, this would load the selected book
-            // For demo, we'll just go to the preview page
-            navigateTo('preview');
-        });
-    });
-
-    // File upload preview
-    if (document.getElementById('childPhoto')) {
-        document.getElementById('childPhoto').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const preview = document.getElementById('photoPreview');
-                    preview.innerHTML = `<img src="${event.target.result}" alt="Preview">`;
-                };
-                reader.readAsDataURL(file);
-                currentState.childData.photo = file;
-            }
-        });
-    }
-    
-    // Additional character checkboxes
-    document.querySelectorAll('.character-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const detailsId = this.id.replace('include', '') + 'Details';
-            const detailsDiv = document.getElementById(detailsId);
+    // Interest options
+    const interestOptions = document.querySelectorAll('.interest-option');
+    interestOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            // Limit to 3 selections
+            const selectedCount = document.querySelectorAll('.interest-option.selected').length;
             
-            if (this.checked) {
-                detailsDiv.classList.add('active');
-                
-                // Update state
-                const characterType = this.id.replace('include', '').toLowerCase();
-                currentState.childData.additionalCharacters[characterType].included = true;
-            } else {
-                detailsDiv.classList.remove('active');
-                
-                // Update state
-                const characterType = this.id.replace('include', '').toLowerCase();
-                currentState.childData.additionalCharacters[characterType].included = false;
+            if (option.classList.contains('selected')) {
+                option.classList.remove('selected');
+            } else if (selectedCount < 3) {
+                option.classList.add('selected');
             }
         });
     });
     
-    // Additional character inputs
-    document.getElementById('siblingName')?.addEventListener('input', function() {
-        currentState.childData.additionalCharacters.sibling.name = this.value;
+    // Gender toggle
+    const genderOptions = document.querySelectorAll('.toggle-option');
+    genderOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            genderOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+        });
     });
     
-    document.getElementById('siblingRelation')?.addEventListener('change', function() {
-        currentState.childData.additionalCharacters.sibling.relation = this.value;
+    // Story length options
+    const lengthOptions = document.querySelectorAll('.length-option');
+    lengthOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            lengthOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+        });
     });
     
-    document.getElementById('petName')?.addEventListener('input', function() {
-        currentState.childData.additionalCharacters.pet.name = this.value;
+    // Cognitive card selection
+    const cognitiveCards = document.querySelectorAll('.cognitive-card');
+    cognitiveCards.forEach(card => {
+        card.addEventListener('click', () => {
+            // Limit to 2 selections
+            const selectedCount = document.querySelectorAll('.cognitive-card.selected').length;
+            
+            if (card.classList.contains('selected')) {
+                card.classList.remove('selected');
+            } else if (selectedCount < 2) {
+                card.classList.add('selected');
+            }
+        });
     });
     
-    document.getElementById('petType')?.addEventListener('change', function() {
-        currentState.childData.additionalCharacters.pet.type = this.value;
+    // Art style selection
+    const artStyleCards = document.querySelectorAll('.art-style-card');
+    artStyleCards.forEach(card => {
+        card.addEventListener('click', () => {
+            artStyleCards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+        });
     });
     
-    document.getElementById('friendName')?.addEventListener('input', function() {
-        currentState.childData.additionalCharacters.friend.name = this.value;
-    });
+    // Initialize character manager
+    initializeCharacterManager();
     
-    // Favorite food input
-    document.getElementById('childFood')?.addEventListener('input', function() {
-        currentState.childData.food = this.value;
-    });
+    // Initialize library
+    loadLibrary();
+    
+    // Apply saved user preferences
+    applyUserPreferences();
+    
+    // Create New Story button in result view
+    const createNewButton = document.getElementById('create-new-story');
+    if (createNewButton) {
+        createNewButton.addEventListener('click', () => {
+            showBasicInfoForm();
+        });
+    }
+});
 
-    // Continue to merchandise button
-    document.getElementById('continueToMerchBtn')?.addEventListener('click', function() {
-        // Switch to the merchandise tab
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        
-        document.querySelector('.tab[data-tab="merchandise"]').classList.add('active');
-        document.getElementById('merchandise-tab').classList.add('active');
-    });
-    
-    // Merchandise quantity buttons
-    document.querySelectorAll('.quantity-btn.plus').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const input = this.parentElement.querySelector('.quantity-input');
-            const currentValue = parseInt(input.value);
-            if (currentValue < parseInt(input.max)) {
-                input.value = currentValue + 1;
-                updateMerchandiseOrder(input);
-            }
-        });
-    });
-    
-    document.querySelectorAll('.quantity-btn.minus').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const input = this.parentElement.querySelector('.quantity-input');
-            const currentValue = parseInt(input.value);
-            if (currentValue > parseInt(input.min)) {
-                input.value = currentValue - 1;
-                updateMerchandiseOrder(input);
-            }
-        });
-    });
-    
-    document.querySelectorAll('.quantity-input').forEach(input => {
-        input.addEventListener('change', function() {
-            updateMerchandiseOrder(this);
-        });
-    });
-    
-    // Add bundle button
-    document.getElementById('addBundleBtn')?.addEventListener('click', function() {
-        // Set all merchandise items to 1
-        document.querySelectorAll('.quantity-input').forEach(input => {
-            input.value = 1;
-            updateMerchandiseOrder(input);
-        });
-        
-        // Apply bundle discount
-        currentState.order.merchandise = currentState.order.merchandise.map(item => {
-            return { ...item, price: item.price * 0.8 }; // 20% discount
-        });
-        
-        updateOrderSummary();
-    });
+// Navigation Functions
+function showSetupForm() {
+    document.getElementById('cognitive-areas').style.display = 'none';
+    document.getElementById('library-view').style.display = 'none';
+    document.getElementById('setup-form').style.display = 'block';
+}
 
-    // Onboarding form
-    document.getElementById('onboardingForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+function showCognitiveAreas() {
+    document.getElementById('story-details-form').style.display = 'none';
+    document.getElementById('basic-info-form').style.display = 'none';
+    document.getElementById('art-styles').style.display = 'none';
+    document.getElementById('cognitive-areas').style.display = 'block';
+}
+
+function showArtStyles() {
+    document.getElementById('cognitive-areas').style.display = 'none';
+    document.getElementById('story-result').style.display = 'none';
+    document.getElementById('basic-info-form').style.display = 'none';
+    document.getElementById('story-details-form').style.display = 'none';
+    document.getElementById('art-styles').style.display = 'block';
+}
+
+function showStoryResult() {
+    document.getElementById('art-styles').style.display = 'none';
+    document.getElementById('story-result').style.display = 'block';
+}
+
+function showMainPage() {
+    document.getElementById('library-view').style.display = 'none';
+    document.getElementById('story-result').style.display = 'none';
+    document.getElementById('cognitive-areas').style.display = 'none';
+    document.getElementById('art-styles').style.display = 'none';
+    document.getElementById('story-details-form').style.display = 'none';
+    document.getElementById('basic-info-form').style.display = 'block';
+    
+    // Reset menu items
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    document.querySelector('.menu-item:first-child').classList.add('active');
+}
+
+function showLibrary() {
+    document.getElementById('basic-info-form').style.display = 'none';
+    document.getElementById('story-details-form').style.display = 'none';
+    document.getElementById('story-result').style.display = 'none';
+    document.getElementById('cognitive-areas').style.display = 'none';
+    document.getElementById('art-styles').style.display = 'none';
+    document.getElementById('library-view').style.display = 'block';
+    
+    // Reset menu items
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    document.querySelector('.menu-item:nth-child(2)').classList.add('active');
+    
+    // Refresh library
+    updateLibraryView();
+}
+
+// Navigation Functions for multi-page form
+function showBasicInfoForm() {
+    document.getElementById('story-details-form').style.display = 'none';
+    document.getElementById('cognitive-areas').style.display = 'none';
+    document.getElementById('basic-info-form').style.display = 'block';
+}
+
+function showStoryDetailsForm() {
+    document.getElementById('basic-info-form').style.display = 'none';
+    document.getElementById('cognitive-areas').style.display = 'none';
+    document.getElementById('story-details-form').style.display = 'block';
+}
+
+// Character management
+function initializeCharacterManager() {
+    const addCharacterBtn = document.getElementById('add-character-btn');
+    const charactersContainer = document.getElementById('characters-container');
+    
+    // Add click event to the add character button
+    if (addCharacterBtn) {
+        addCharacterBtn.addEventListener('click', () => {
+            addCharacterInput();
+        });
+    }
+    
+    // Function to add a new character input
+    function addCharacterInput() {
+        const characterId = Date.now(); // Unique ID for each character
+        const characterDiv = document.createElement('div');
+        characterDiv.className = 'character-input-group';
+        characterDiv.dataset.id = characterId;
         
-        // Get child data
-        currentState.childData = {
-            name: document.getElementById('childName').value,
-            age: document.getElementById('childAge').value,
-            gender: document.getElementById('childGender').value,
-            interests: document.getElementById('childInterests').value,
-            appearance: document.getElementById('childAppearance').value,
-            food: document.getElementById('childFood').value,
-            photo: currentState.childData.photo,
-            additionalCharacters: {
-                sibling: {
-                    included: document.getElementById('includeSibling')?.checked || false,
-                    name: document.getElementById('siblingName')?.value || '',
-                    relation: document.getElementById('siblingRelation')?.value || ''
-                },
-                pet: {
-                    included: document.getElementById('includePet')?.checked || false,
-                    name: document.getElementById('petName')?.value || '',
-                    type: document.getElementById('petType')?.value || ''
-                },
-                friend: {
-                    included: document.getElementById('includeFriend')?.checked || false,
-                    name: document.getElementById('friendName')?.value || ''
-                }
+        characterDiv.innerHTML = `
+            <input type="text" class="text-input character-input" placeholder="Character name and description, e.g., 'Sister Emma'">
+            <button type="button" class="remove-character-btn" onclick="removeCharacter(${characterId})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        `;
+        
+        charactersContainer.appendChild(characterDiv);
+    }
+}
+
+// Remove a character input
+function removeCharacter(characterId) {
+    const characterElement = document.querySelector(`.character-input-group[data-id="${characterId}"]`);
+    if (characterElement) {
+        characterElement.remove();
+    }
+}
+
+// Collect all character inputs
+function collectCharacters() {
+    const characters = [];
+    const characterInputs = document.querySelectorAll('.character-input');
+    
+    characterInputs.forEach(input => {
+        const value = input.value.trim();
+        if (value) {
+            characters.push(value);
+        }
+    });
+    
+    return characters;
+}
+
+// Validate API key format
+function validateApiKey(apiKey) {
+    if (!apiKey) {
+        return { valid: false, message: 'Please enter your OpenAI API key' };
+    }
+    
+    apiKey = apiKey.trim();
+    
+    if (!apiKey.startsWith('sk-')) {
+        return { 
+            valid: false, 
+            message: 'Invalid API key format. OpenAI API keys should start with "sk-"' 
+        };
+    }
+    
+    if (apiKey.length < 20) {
+        return { 
+            valid: false, 
+            message: 'Invalid API key length. OpenAI API keys are typically at least 20 characters long' 
+        };
+    }
+    
+    return { valid: true };
+}
+
+// Generate story function
+async function generateStory() {
+    // Show loading spinner
+    document.getElementById('loading').style.display = 'flex';
+    
+    // Gather user inputs
+    const apiKey = document.getElementById('openai-key').value;
+    const childName = document.getElementById('child-name').value || 'Alex';
+    const childGender = document.querySelector('.toggle-option.active').textContent;
+    const childAge = document.getElementById('age-slider').value;
+    const storyLength = document.querySelector('.length-option.active').getAttribute('data-length') || 'short';
+    const customPrompt = document.getElementById('custom-prompt').value || '';
+    
+    // Get characters from the new interface
+    const characters = collectCharacters();
+    
+    const selectedInterests = [];
+    document.querySelectorAll('.interest-option.selected').forEach(interest => {
+        selectedInterests.push(interest.textContent);
+    });
+    
+    const selectedCognitiveAreas = [];
+    document.querySelectorAll('.cognitive-card.selected').forEach(area => {
+        selectedCognitiveAreas.push({
+            name: area.querySelector('h3').textContent,
+            description: area.querySelector('p').textContent
+        });
+    });
+    
+    const selectedArtStyle = document.querySelector('.art-style-card.selected') ? 
+        document.querySelector('.art-style-card.selected').getAttribute('data-style') : 
+        'watercolor';
+    
+    // Validate API key
+    const keyValidation = validateApiKey(apiKey);
+    if (!keyValidation.valid) {
+        showErrorMessage(`❌ API Key Error\n\n${keyValidation.message}\n\nPlease check your API key and try again. You can find your API keys at https://platform.openai.com/api-keys`);
+        document.getElementById('loading').style.display = 'none';
+        return;
+    }
+    
+    try {
+        // Generate story with GPT-3.5
+        const storyPrompt = generateStoryPrompt(childName, childGender, childAge, selectedInterests, selectedCognitiveAreas, storyLength, customPrompt, characters);
+        console.log('Story prompt:', storyPrompt); // Debug - log the prompt
+        
+        const storyResponse = await callChatGPT(apiKey, storyPrompt);
+        console.log('Story response:', storyResponse); // Debug - log the raw response
+        
+        // Parse story content
+        const storyData = parseStoryResponse(storyResponse, childName, selectedInterests);
+        
+        // Generate illustration with DALL-E
+        const imagePrompt = generateImagePrompt(childName, childGender, storyData.title, selectedArtStyle);
+        console.log('Image prompt:', imagePrompt); // Debug - log the image prompt
+        
+        const imageUrl = await generateImageWithDALLE(apiKey, imagePrompt);
+        
+        // Save the current story data for library saving
+        window.currentStoryData = {
+            title: storyData.title,
+            content: storyData.content,
+            imageUrl: imageUrl,
+            meta: {
+                childName: childName,
+                childAge: childAge,
+                childGender: childGender,
+                interests: selectedInterests,
+                cognitiveAreas: selectedCognitiveAreas.map(area => area.name),
+                artStyle: selectedArtStyle,
+                storyLength: storyLength,
+                customPrompt: customPrompt,
+                characters: characters,
+                dateCreated: new Date().toISOString()
             }
         };
         
-        // Get story type
-        const storyTypeSelect = document.getElementById('storyType');
-        const storyType = storyTypeSelect.value;
-        const storyTypeText = storyTypeSelect.options[storyTypeSelect.selectedIndex].text;
-        
-        // Update story state
-        currentState.story.type = storyType;
-        currentState.story.title = `${currentState.childData.name}'s ${storyTypeText}`;
-        
-        // Update order information
-        currentState.order.bookTitle = currentState.story.title;
-        
-        // Go to loading screen
-        navigateTo('loading');
-        
-        // Generate story
-        generateStory();
-    });
-
-    // Book navigation
-    document.getElementById('prevPageBtn').addEventListener('click', function() {
-        if (currentState.story.currentPage > 0) {
-            const bookPages = document.querySelector('.book-pages');
-            bookPages.classList.add('page-turning');
-            
-            setTimeout(() => {
-                currentState.story.currentPage--;
-                updateStoryPage();
-                bookPages.classList.remove('page-turning');
-            }, 500);
-        }
-    });
-    
-    document.getElementById('nextPageBtn').addEventListener('click', function() {
-        if (currentState.story.currentPage < currentState.story.content.length - 1) {
-            const bookPages = document.querySelector('.book-pages');
-            bookPages.classList.add('page-turning');
-            
-            setTimeout(() => {
-                currentState.story.currentPage++;
-                updateStoryPage();
-                bookPages.classList.remove('page-turning');
-            }, 500);
-        }
-    });
-
-    // Checkout button
-    document.getElementById('checkoutBtn').addEventListener('click', function() {
-        prepareCheckout();
-        navigateTo('checkout');
-    });
-    
-    // Pricing option selection
-    if (document.querySelectorAll('.pricing-option')) {
-        document.querySelectorAll('.pricing-option').forEach(option => {
-            option.addEventListener('click', function() {
-                // Remove selected class from all options
-                document.querySelectorAll('.pricing-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                    opt.querySelector('button').textContent = 'Select';
-                    opt.querySelector('button').className = 'btn primary';
-                });
-                
-                // Add selected class to clicked option
-                this.classList.add('selected');
-                this.querySelector('button').textContent = 'Selected';
-                this.querySelector('button').className = 'btn outline';
-                
-                // Update order information based on selection
-                const format = this.querySelector('.pricing-title').textContent.toLowerCase();
-                const price = parseFloat(this.querySelector('.pricing-price').textContent.replace('$', ''));
-                
-                currentState.order.format = format;
-                currentState.order.price = price;
-                
-                // Update shipping cost based on format
-                if (format.includes('digital') && !format.includes('bundle')) {
-                    currentState.order.shipping = 0;
-                } else {
-                    currentState.order.shipping = 4.99;
-                }
-                
-                updateOrderSummary();
-            });
+        // Save user preferences to localStorage for future sessions
+        saveUserPreferences({
+            childName,
+            childGender,
+            childAge,
+            selectedInterests,
+            customPrompt,
+            characters
         });
-    }
-    
-    // Tab switching in checkout
-    if (document.querySelectorAll('.tab')) {
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Remove active class from all tabs and content
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                // Add active class to clicked tab and corresponding content
-                this.classList.add('active');
-                const tabId = this.getAttribute('data-tab');
-                document.getElementById(`${tabId}-tab`).classList.add('active');
-            });
-        });
-    }
-    
-    // Continue to payment button
-    if (document.getElementById('continueToPaymentBtn')) {
-        document.getElementById('continueToPaymentBtn').addEventListener('click', function() {
-            // Switch to the payment tab
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            document.querySelector('.tab[data-tab="payment"]').classList.add('active');
-            document.getElementById('payment-tab').classList.add('active');
-        });
-    }
-
-    // Payment form
-    document.getElementById('paymentForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        processPayment();
-    });
-
-    // View Library button
-    if (document.getElementById('viewLibraryBtn')) {
-        document.getElementById('viewLibraryBtn').addEventListener('click', function() {
-            navigateTo('library');
-        });
-    }
-
-    // Create another book button
-    document.getElementById('createAnotherBtn').addEventListener('click', function() {
-        resetStoryState();
-        navigateTo('onboarding');
-    });
-}
-
-// Update logout button based on login state
-function updateLogoutButton() {
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (currentState.loggedIn) {
-        logoutBtn.style.display = 'block';
-    } else {
-        logoutBtn.style.display = 'none';
-    }
-}
-
-// Update merchandise order
-function updateMerchandiseOrder(input) {
-    const quantity = parseInt(input.value);
-    const item = input.dataset.item;
-    const price = parseFloat(input.dataset.price);
-    
-    // Remove existing item from order
-    currentState.order.merchandise = currentState.order.merchandise.filter(
-        merchItem => merchItem.item !== item
-    );
-    
-    // Add item if quantity > 0
-    if (quantity > 0) {
-        currentState.order.merchandise.push({
-            item: item,
-            quantity: quantity,
-            price: price * quantity,
-            unitPrice: price
-        });
-    }
-    
-    updateOrderSummary();
-}
-
-// Update order summary
-function updateOrderSummary() {
-    const orderTitle = document.getElementById('orderTitle');
-    const orderPrice = document.getElementById('orderPrice');
-    const orderShipping = document.getElementById('orderShipping');
-    const orderTotal = document.getElementById('orderTotal');
-    const merchandiseItems = document.getElementById('merchandiseItems');
-    
-    // Book title and price
-    orderTitle.textContent = `${currentState.order.format}: ${currentState.order.bookTitle}`;
-    orderPrice.textContent = `$${currentState.order.price.toFixed(2)}`;
-    
-    // Calculate shipping based on format and merchandise
-    let shipping = 0;
-    if (currentState.order.format.includes('digital') && !currentState.order.format.includes('bundle')) {
-        shipping = 0;
-    } else {
-        shipping = 4.99;
-    }
-    
-    // Add extra shipping for physical merchandise
-    if (currentState.order.merchandise.length > 0) {
-        shipping = Math.max(shipping, 4.99);
-    }
-    
-    currentState.order.shipping = shipping;
-    orderShipping.textContent = `$${shipping.toFixed(2)}`;
-    
-    // Merchandise items
-    merchandiseItems.innerHTML = '';
-    let merchandiseTotal = 0;
-    
-    currentState.order.merchandise.forEach(item => {
-        const merchItem = document.createElement('div');
-        merchItem.className = 'order-item';
         
-        const itemName = item.item.charAt(0).toUpperCase() + item.item.slice(1);
-        merchItem.innerHTML = `
-            <span>${itemName} (${item.quantity})</span>
-            <span>$${item.price.toFixed(2)}</span>
-        `;
+        // Display the story and image
+        displayStory(storyData, imageUrl, selectedCognitiveAreas);
         
-        merchandiseItems.appendChild(merchItem);
-        merchandiseTotal += item.price;
-    });
-    
-    // Calculate total
-    const total = currentState.order.price + currentState.order.shipping + merchandiseTotal;
-    orderTotal.textContent = `$${total.toFixed(2)}`;
-}
-
-// Generate story content
-async function generateStory() {
-    try {
-        // Mock content for demo
-        if (!USE_REAL_LLM) {
-            setTimeout(() => {
-                const mockStoryContent = generateMockStory();
-                currentState.story.content = mockStoryContent;
-                currentState.story.currentPage = 0;
-                preparePreview();
-                navigateTo('preview');
-            }, 3000);
-            return;
-        }
-        
-        // For real LLM implementation (future)
-        const prompt = buildStoryPrompt();
-        const response = await callLLMApi(prompt);
-        
-        if (response && response.story) {
-            currentState.story.content = parseStoryContent(response.story);
-            currentState.story.currentPage = 0;
-            preparePreview();
-            navigateTo('preview');
-        } else {
-            throw new Error('Failed to generate story');
-        }
+        // Hide loading and show result
+        document.getElementById('loading').style.display = 'none';
+        showStoryResult();
     } catch (error) {
         console.error('Error generating story:', error);
-        alert('Sorry, there was an error generating your story. Please try again.');
-        navigateTo('onboarding');
+        
+        // Create a more user-friendly and verbose error message
+        let errorMessage = 'There was an error generating your story.';
+        let errorDetails = '';
+        let errorSolution = '';
+        
+        // Extract error message
+        const errorText = error.message || '';
+        
+        // Check for common error patterns
+        if (errorText.includes('401') || errorText.includes('Authentication') || errorText.includes('Unauthorized')) {
+            errorMessage = '❌ Authentication Error';
+            errorDetails = 'Your OpenAI API key is invalid, expired, or was entered incorrectly.';
+            errorSolution = 'Please check that you\'ve entered your API key correctly. You can find or create new API keys at https://platform.openai.com/api-keys';
+        } else if (errorText.includes('quota') || errorText.includes('billing')) {
+            errorMessage = '❌ API Quota Exceeded';
+            errorDetails = 'Your OpenAI account has reached its usage limit.';
+            errorSolution = 'Please check your OpenAI billing settings at https://platform.openai.com/account/billing to add payment information or upgrade your plan.';
+        } else if (errorText.includes('invalid_api_key') || errorText.includes('api key')) {
+            errorMessage = '❌ Invalid API Key';
+            errorDetails = 'The OpenAI API key you provided is invalid or has been revoked.';
+            errorSolution = 'Please check your API key and try again. You can find your API keys at https://platform.openai.com/api-keys';
+        } else if (errorText.includes('rate limit') || errorText.includes('rate_limit')) {
+            errorMessage = '❌ Rate Limit Exceeded';
+            errorDetails = 'You\'ve made too many requests in a short time period.';
+            errorSolution = 'Please wait a few minutes before trying again.';
+        } else if (errorText.toLowerCase().includes('connectivity') || errorText.includes('network')) {
+            errorMessage = '❌ Network Error';
+            errorDetails = 'Unable to connect to OpenAI servers.';
+            errorSolution = 'Please check your internet connection and try again.';
+        } else {
+            // Generic error
+            errorDetails = errorText;
+            errorSolution = 'Please try again. If this issue persists, check the console for more details.';
+        }
+        
+        // Show error in console for debugging
+        console.log('Full error details:', {
+            error: error,
+            stack: error.stack,
+            message: errorText
+        });
+        
+        // Create a formatted error message
+        const formattedError = `${errorMessage}\n\n${errorDetails}\n\n${errorSolution}`;
+        
+        // Show error to user
+        showErrorMessage(formattedError);
+        document.getElementById('loading').style.display = 'none';
     }
 }
 
-// Build story prompt for LLM with additional characters and food
-function buildStoryPrompt() {
-    let prompt = `Create an illustrated children's story for a ${currentState.childData.age}-year-old ${currentState.childData.gender} named ${currentState.childData.name} who is interested in ${currentState.childData.interests}. 
-    ${currentState.childData.appearance ? `The child looks like: ${currentState.childData.appearance}.` : ''}
-    ${currentState.childData.food ? `The child's favorite food is ${currentState.childData.food}.` : ''}`;
+// Generate prompt for the story
+function generateStoryPrompt(name, gender, age, interests, cognitiveAreas, storyLength, customPrompt, characters = []) {
+    // Set pronouns based on gender
+    const pronoun = gender === 'Boy' ? 'he' : 'she';
+    const possessive = gender === 'Boy' ? 'his' : 'her';
     
-    // Add additional characters
-    if (currentState.childData.additionalCharacters.sibling.included) {
-        prompt += ` Include the child's ${currentState.childData.additionalCharacters.sibling.relation} named ${currentState.childData.additionalCharacters.sibling.name} as a supporting character.`;
+    // Build interest string
+    const interestsStr = interests.length > 0 
+        ? interests.join(', ') 
+        : 'exploration and learning';
+    
+    // Build cognitive areas string
+    const cognitiveAreasStr = cognitiveAreas.map(area => area.name).join(', ');
+    
+    // Build characters string
+    const charactersStr = characters.length > 0
+        ? `Include these additional characters in the story: ${characters.join(', ')}. `
+        : '';
+    
+    // Set word count based on length
+    let wordCount = 200;
+    if (storyLength === 'medium') wordCount = 400;
+    if (storyLength === 'long') wordCount = 600;
+    
+    // Create the prompt
+    let prompt = `Create a ${storyLength} children's story (around ${wordCount} words) about a ${age}-year-old ${gender.toLowerCase()} named ${name} who loves ${interestsStr}. ${charactersStr}`;
+    
+    if (cognitiveAreas.length > 0) {
+        prompt += `The story should focus on developing these cognitive areas: ${cognitiveAreasStr}. `;
+        
+        // Add specific instructions for each cognitive area
+        cognitiveAreas.forEach(area => {
+            if (area.name.includes('Emotional')) {
+                prompt += `For emotional recognition, include scenarios where ${name} identifies and names feelings. `;
+            }
+            
+            if (area.name.includes('Problem Solving')) {
+                prompt += `For problem solving, include a challenge that ${name} solves through logical thinking. `;
+            }
+            
+            if (area.name.includes('Attention')) {
+                prompt += `For attention and focus, include a scenario where ${name} needs to concentrate despite distractions. `;
+            }
+            
+            if (area.name.includes('Memory')) {
+                prompt += `For memory development, include opportunities for ${name} to recall and use information. `;
+            }
+            
+            if (area.name.includes('Language')) {
+                prompt += `For language development, include rich vocabulary and dialogue. `;
+            }
+            
+            if (area.name.includes('Executive Function')) {
+                prompt += `For executive function, include planning, self-control, and decision-making. `;
+            }
+            
+            if (area.name.includes('Conceptual')) {
+                prompt += `For conceptual understanding, include connections between ideas and categorization. `;
+            }
+        });
     }
     
-    if (currentState.childData.additionalCharacters.pet.included) {
-        prompt += ` Include the child's pet ${currentState.childData.additionalCharacters.pet.type} named ${currentState.childData.additionalCharacters.pet.name} in the story.`;
-    }
-    
-    if (currentState.childData.additionalCharacters.friend.included) {
-        prompt += ` Include the child's friend named ${currentState.childData.additionalCharacters.friend.name} as part of the adventure.`;
+    // Add custom prompt if provided
+    if (customPrompt && customPrompt.trim() !== '') {
+        prompt += `\nAdditional story elements: ${customPrompt.trim()} `;
     }
     
     prompt += `
-    The story should be a ${currentState.story.type} story. 
-    Divide the story into 10-12 pages, with each page having text that would fit on a single page of a children's book.
-    Include text with varying styles, sizes, and emphasis to make it engaging for children.
-    Start with "Once upon a time..." and end with a moral lesson.`;
+    The story should be appropriate for a ${age}-year-old child and be around ${wordCount} words.
+    
+    Format your response as JSON with the following structure:
+    {
+      "title": "A creative title for the story",
+      "content": "The full story content"
+    }`;
     
     return prompt;
 }
 
-// Call to LLM API (placeholder for future implementation)
-async function callLLMApi(prompt) {
-    // This would be replaced with actual API call
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({
-                story: generateMockStory()
-            });
-        }, 3000);
-    });
-}
-
-// Parse story content from LLM response
-function parseStoryContent(storyText) {
-    // This function would parse the LLM response into pages
-    // For now, we'll just return the mock story
-    return storyText;
-}
-
-// Generate mock story for demo purposes
-function generateMockStory() {
-    const name = currentState.childData.name || 'Alex';
-    const interests = currentState.childData.interests || 'space and dinosaurs';
-    const storyType = currentState.story.type || 'adventure';
+// Generate prompt for DALL-E image
+function generateImagePrompt(name, gender, title, artStyle) {
+    const pronoun = gender === 'Boy' ? 'boy' : 'girl';
     
-    let pages = [];
-    
-    if (storyType === 'adventure') {
-        pages = [
-            `<p><span class="story-text highlight-yellow">Once upon a time,</span> there was a brave child named <span class="story-text highlight-blue">${name}</span> who loved ${interests}. Every night before bed, <span class="story-text highlight-green">${name}</span> would dream of exciting adventures.</p>`,
-            
-            `<p>One night, as <span class="story-text highlight-pink">${name}</span> was fast asleep, a <span class="story-text highlight-yellow">magical shooting star</span> streaked across the sky and stopped right outside the bedroom window. It sparkled with all the colors of the rainbow.</p>`,
-            
-            `<p>The star spoke in a gentle voice, <span class="story-text highlight-green">"Hello, ${name}! I've heard that you love ${interests}. Would you like to join me on an adventure through the cosmos?"</span></p>`,
-            
-            `<p><span class="story-text highlight-blue">${name}</span> couldn't believe it! <span class="story-text highlight-pink">"Yes, yes, yes!"</span> ${name} exclaimed, quickly putting on slippers. The star created a bridge of light connecting to the windowsill.</p>`,
-            
-            `<p>As <span class="story-text highlight-blue">${name}</span> stepped onto the bridge, it felt solid yet bouncy, like walking on a cloud. They zoomed up into the night sky, leaving the neighborhood behind.</p>`,
-            
-            `<p>Their first stop was the <span class="story-text highlight-yellow">Moon</span>, where they met a family of friendly Moon Bunnies who were making moon cakes. <span class="story-text highlight-green">"Would you like to learn how to make moon cakes?"</span> they asked.</p>`,
-            
-            `<p><span class="story-text highlight-blue">${name}</span> spent time with the Moon Bunnies, learning their special recipe. <span class="story-text highlight-pink">"The secret ingredient,"</span> they whispered, <span class="story-text highlight-green">"is believing in yourself."</span></p>`,
-            
-            `<p>Next, they visited <span class="story-text highlight-yellow">Mars</span>, where dinosaurs still roamed! The Martian dinosaurs were friendly and smaller than Earth dinosaurs. A baby Triceratops named <span class="story-text highlight-pink">Topsy</span> became ${name}'s friend.</p>`,
-            
-            `<p><span class="story-text highlight-pink">Topsy</span> showed <span class="story-text highlight-blue">${name}</span> a cave filled with glowing crystals that told stories of ancient times. <span class="story-text highlight-green">"These crystals hold the wisdom of the universe,"</span> Topsy explained.</p>`,
-            
-            `<p>As the night was ending, the star brought <span class="story-text highlight-blue">${name}</span> back home. <span class="story-text highlight-green">"Remember,"</span> the star said, <span class="story-text highlight-green">"adventures are all around you, even in small everyday things."</span></p>`,
-            
-            `<p><span class="story-text highlight-blue">${name}</span> woke up the next morning, wondering if it was all a dream. But there on the bedside table was a tiny glowing crystal and a moon cake.</p>`,
-            
-            `<p>From that day on, <span class="story-text highlight-blue">${name}</span> looked at the world differently, finding adventure and magic in everyday life. And every night, <span class="story-text highlight-blue">${name}</span> would wave to the stars, ready for the next dream adventure.</p>`
-        ];
-    } else if (storyType === 'educational') {
-        pages = [
-            `<p><span class="story-text highlight-yellow">Once upon a time,</span> there was a curious child named <span class="story-text highlight-blue">${name}</span> who loved learning about ${interests}. Every day was a new opportunity to discover something amazing.</p>`,
-            
-            `<p>One day, <span class="story-text highlight-blue">${name}</span> found a <span class="story-text highlight-yellow">special book</span> in the library. It was glowing slightly, and when <span class="story-text highlight-blue">${name}</span> opened it, the pages seemed to come alive!</p>`,
-            
-            `<p><span class="story-text highlight-green">"Hello there!"</span> said a friendly voice from the book. <span class="story-text highlight-green">"I'm Professor Pagely, and I can teach you all about ${interests}. Would you like to learn with me?"</span></p>`,
-            
-            `<p><span class="story-text highlight-pink">"Yes, please!"</span> said <span class="story-text highlight-blue">${name}</span> excitedly. Suddenly, the book began to grow larger and larger until it was as big as a door. Professor Pagely gestured for <span class="story-text highlight-blue">${name}</span> to step inside.</p>`,
-            
-            `<p>Inside the book was a <span class="story-text highlight-yellow">magical classroom</span> with windows looking out to different times and places. <span class="story-text highlight-green">"Today,"</span> said Professor Pagely, <span class="story-text highlight-green">"we'll learn through adventure!"</span></p>`,
-            
-            `<p>Their first lesson was about space. <span class="story-text highlight-pink">Did you know that stars are huge balls of gas that produce their own light and heat? The Sun is our closest star and it's 93 million miles away!</span></p>`,
-            
-            `<p>Next, they learned about dinosaurs. <span class="story-text highlight-pink">Tyrannosaurus Rex had teeth as big as bananas! Triceratops had three horns and a giant frill to protect itself. Dinosaurs lived on Earth for 165 million years!</span></p>`,
-            
-            `<p>For their third lesson, they explored oceans. <span class="story-text highlight-pink">The deepest part of the ocean is called the Mariana Trench, and it's almost 7 miles deep! More people have been to the moon than have visited the deepest part of the ocean.</span></p>`,
-            
-            `<p><span class="story-text highlight-green">"Knowledge is like a treasure,"</span> Professor Pagely explained. <span class="story-text highlight-green">"The more you discover, the richer your world becomes. And the wonderful thing is, there's always more to learn!"</span></p>`,
-            
-            `<p>As their adventure came to an end, Professor Pagely gave <span class="story-text highlight-blue">${name}</span> a special bookmark. <span class="story-text highlight-green">"Place this in any book,"</span> he said, <span class="story-text highlight-green">"and you'll be able to learn in this special way again."</span></p>`,
-            
-            `<p><span class="story-text highlight-blue">${name}</span> returned home, filled with excitement about all the new things learned. From that day on, <span class="story-text highlight-blue">${name}</span> saw books not just as pages with words, but doorways to adventure.</p>`,
-            
-            `<p>And the most important lesson <span class="story-text highlight-blue">${name}</span> learned was that curiosity and a love of learning make every day an adventure. With books and imagination, you can go anywhere and be anything you dream of.</p>`
-        ];
-    } else {
-        pages = [
-            `<p><span class="story-text highlight-yellow">Once upon a time,</span> there was a kind-hearted child named <span class="story-text highlight-blue">${name}</span> who loved ${interests}. <span class="story-text highlight-blue">${name}</span> lived in a cozy house with a beautiful garden filled with colorful flowers.</p>`,
-            
-            `<p>Every morning, <span class="story-text highlight-blue">${name}</span> would wake up early to help water the garden and feed the birds that visited. The birds loved <span class="story-text highlight-blue">${name}</span> and would sing happy songs whenever <span class="story-text highlight-blue">${name}</span> was around.</p>`,
-            
-            `<p>One rainy day, <span class="story-text highlight-blue">${name}</span> found a <span class="story-text highlight-yellow">tiny kitten</span> huddled under a bush in the garden. The poor kitten was wet, cold, and scared. Its fur was matted, and it looked very hungry.</p>`,
-            
-            `<p><span class="story-text highlight-green">"Don't worry, little one,"</span> <span class="story-text highlight-blue">${name}</span> said gently. <span class="story-text highlight-green">"I'll take care of you."</span> <span class="story-text highlight-blue">${name}</span> carefully picked up the kitten and brought it inside the warm house.</p>`,
-            
-            `<p><span class="story-text highlight-blue">${name}</span> dried the kitten with a soft towel, gave it some warm milk, and made a cozy bed from a basket and a blanket. The kitten purred happily, feeling safe for the first time in days.</p>`,
-            
-            `<p><span class="story-text highlight-green">"I'll call you Raindrop,"</span> <span class="story-text highlight-blue">${name}</span> decided, stroking the kitten's soft fur. Raindrop looked up at <span class="story-text highlight-blue">${name}</span> with big, grateful eyes and snuggled closer.</p>`,
-            
-            `<p>As days passed, <span class="story-text highlight-blue">${name}</span> took wonderful care of Raindrop. They would play together in the garden when it was sunny, and cuddle together when it rained.</p>`,
-            
-            `<p>Word spread about <span class="story-text highlight-blue">${name}</span>'s kindness to animals. Soon, neighbors started bringing injured birds and lost pets to <span class="story-text highlight-blue">${name}</span> for help, knowing they would be cared for with love.</p>`,
-            
-            `<p>With the help of parents and neighbors, <span class="story-text highlight-blue">${name}</span> created a small animal sanctuary in the backyard. There were comfortable shelters for strays and bird feeders for feathered friends.</p>`,
-            
-            `<p>The garden became a <span class="story-text highlight-yellow">magical place</span> where all creatures felt welcome and safe. Even shy animals like rabbits and squirrels would visit to play with <span class="story-text highlight-blue">${name}</span> and Raindrop.</p>`,
-            
-            `<p><span class="story-text highlight-green">"You have the gentlest heart,"</span> <span class="story-text highlight-blue">${name}</span>'s mother said proudly. <span class="story-text highlight-green">"Your kindness has created a haven for so many creatures who needed help."</span></p>`,
-            
-            `<p><span class="story-text highlight-blue">${name}</span> learned that one small act of kindness can grow into something wonderful. By helping one little kitten on a rainy day, <span class="story-text highlight-blue">${name}</span> had started a ripple of compassion that touched many lives, both animal and human.</p>`
-        ];
+    let styleDescription = '';
+    switch(artStyle) {
+        case 'watercolor':
+            styleDescription = 'watercolor illustration style, soft pastel colors';
+            break;
+        case 'digital':
+            styleDescription = 'digital vector illustration style, bright colors';
+            break;
+        case 'pen-ink':
+            styleDescription = 'pen and ink illustration with color washes, detailed linework';
+            break;
+        case 'collage':
+            styleDescription = 'mixed media collage style, textured and colorful';
+            break;
+        case '3d':
+            styleDescription = '3D rendered illustration, friendly and colorful';
+            break;
+        default:
+            styleDescription = 'children\'s book illustration style';
     }
     
-    return pages;
+    return `A child-friendly illustration for a children's book titled "${title}". 
+    Show a ${pronoun} named ${name} as the main character. 
+    The illustration should be in ${styleDescription}. 
+    The image should be appealing to young children, with no text.
+    Make it colorful, friendly, and suitable for a children's book.`;
 }
 
-// Prepare preview page
-function preparePreview() {
-    document.getElementById('storyTitle').innerHTML = `<i class="fa-solid fa-book-open"></i> ${currentState.story.title}`;
-    updateStoryPage();
+// Parse the GPT response 
+function parseStoryResponse(response, childName, interests) {
+    try {
+        const jsonData = JSON.parse(response);
+        return {
+            title: jsonData.title || `${childName}'s ${interests.length > 0 ? interests[0] : 'Adventure'} Day`,
+            content: jsonData.content || response
+        };
+    } catch (error) {
+        console.error('Error parsing story JSON:', error);
+        // If JSON parsing fails, return the raw text
+        return {
+            title: `${childName}'s ${interests.length > 0 ? interests[0] : 'Adventure'} Day`,
+            content: response
+        };
+    }
 }
 
-// Update current story page in preview
-function updateStoryPage() {
-    const pageContent = document.getElementById('pageContent');
-    const pageIndicator = document.getElementById('pageIndicator');
-    const prevBtn = document.getElementById('prevPageBtn');
-    const nextBtn = document.getElementById('nextPageBtn');
+// Display the story and image
+function displayStory(storyData, imageUrl, cognitiveAreas) {
+    // Set title
+    document.getElementById('story-title').textContent = storyData.title;
     
-    // Update page content
-    const currentPage = currentState.story.currentPage;
-    const totalPages = currentState.story.content.length;
+    // Split the content into paragraphs
+    const paragraphs = storyData.content.split('\n\n').filter(para => para.trim());
     
-    pageContent.innerHTML = currentState.story.content[currentPage];
-    pageIndicator.textContent = `Page ${currentPage + 1} of ${totalPages}`;
+    // Store paragraphs and current page in window object for pagination
+    window.storyPagination = {
+        paragraphs: paragraphs,
+        currentPage: 0,
+        totalPages: paragraphs.length
+    };
+    
+    // Display the first page
+    displayStoryPage(0);
+    
+    // Set image
+    document.getElementById('story-illustration').src = imageUrl;
+    
+    // Add cognitive details
+    const cognitiveDetailsContainer = document.getElementById('cognitive-details');
+    cognitiveDetailsContainer.innerHTML = '';
+    
+    cognitiveAreas.forEach(area => {
+        const detailCard = document.createElement('div');
+        detailCard.className = 'cognitive-detail-card';
+        detailCard.innerHTML = `
+            <h4>${area.name}</h4>
+            <p>${area.description}</p>
+        `;
+        cognitiveDetailsContainer.appendChild(detailCard);
+    });
+    
+    // Setup pagination controls
+    setupPaginationControls();
+}
+
+// Display a specific page of the story
+function displayStoryPage(pageIndex) {
+    if (!window.storyPagination) return;
+    
+    const { paragraphs, totalPages } = window.storyPagination;
+    
+    // Validate page index
+    if (pageIndex < 0) pageIndex = 0;
+    if (pageIndex >= totalPages) pageIndex = totalPages - 1;
+    
+    // Update current page
+    window.storyPagination.currentPage = pageIndex;
+    
+    // Get the paragraph for this page
+    const paragraph = paragraphs[pageIndex];
+    
+    // Format the paragraph with proper HTML
+    const formattedParagraph = `<p>${paragraph}</p>`;
+    
+    // Get elements, checking if they exist
+    const storyTextEl = document.getElementById('story-text');
+    const pageNumberEl = document.getElementById('page-number');
+    
+    // Update the page content if element exists
+    if (storyTextEl) {
+        storyTextEl.innerHTML = formattedParagraph;
+    }
+    
+    // Update page number if element exists
+    if (pageNumberEl) {
+        pageNumberEl.textContent = (pageIndex + 1);
+    }
+    
+    // Update pagination controls visibility
+    updatePaginationControls();
+}
+
+// Setup pagination controls
+function setupPaginationControls() {
+    // Make sure pagination data exists
+    if (!window.storyPagination) return;
+    
+    // Create pagination controls if they don't exist
+    if (!document.getElementById('pagination-controls')) {
+        const paginationControls = document.createElement('div');
+        paginationControls.id = 'pagination-controls';
+        paginationControls.className = 'pagination-controls';
+        paginationControls.innerHTML = `
+            <button id="prev-page" class="page-nav-btn prev-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5"></path>
+                    <path d="M12 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <div class="page-indicator">
+                Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+            </div>
+            <button id="next-page" class="page-nav-btn next-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14"></path>
+                    <path d="M12 5l7 7-7 7"></path>
+                </svg>
+            </button>
+        `;
+        
+        // Get the book container
+        const bookContainer = document.querySelector('.book-pages');
+        if (bookContainer) {
+            // Add controls after the book container
+            bookContainer.insertAdjacentElement('afterend', paginationControls);
+            
+            // Add event listeners
+            const prevPage = document.getElementById('prev-page');
+            const nextPage = document.getElementById('next-page');
+            
+            if (prevPage) prevPage.addEventListener('click', navigateToPrevPage);
+            if (nextPage) nextPage.addEventListener('click', navigateToNextPage);
+        }
+    }
+    
+    // Update the pagination info if elements exist
+    const totalPagesEl = document.getElementById('total-pages');
+    const currentPageEl = document.getElementById('current-page');
+    
+    if (totalPagesEl) {
+        totalPagesEl.textContent = window.storyPagination.totalPages;
+    }
+    
+    if (currentPageEl) {
+        currentPageEl.textContent = window.storyPagination.currentPage + 1;
+    }
+    
+    // Show/hide buttons based on current page
+    updatePaginationControls();
+}
+
+// Update visibility of pagination controls
+function updatePaginationControls() {
+    if (!window.storyPagination) return;
+    
+    const { currentPage, totalPages } = window.storyPagination;
+    
+    // Check if elements exist before trying to update them
+    const currentPageEl = document.getElementById('current-page');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    
+    // If any of these elements don't exist, exit early
+    if (!currentPageEl || !prevBtn || !nextBtn) return;
+    
+    // Update page indicator
+    currentPageEl.textContent = currentPage + 1;
     
     // Update button states
     prevBtn.disabled = currentPage === 0;
+    prevBtn.style.opacity = currentPage === 0 ? 0.5 : 1;
+    
     nextBtn.disabled = currentPage === totalPages - 1;
+    nextBtn.style.opacity = currentPage === totalPages - 1 ? 0.5 : 1;
 }
 
-// Prepare checkout page
-function prepareCheckout() {
-    // Set the default pricing option
-    document.getElementById('orderTitle').textContent = `Digital Book: ${currentState.order.bookTitle}`;
-    document.getElementById('orderPrice').textContent = `$${currentState.order.price.toFixed(2)}`;
-    document.getElementById('orderShipping').textContent = `$${currentState.order.shipping.toFixed(2)}`;
+// Navigate to the previous page
+function navigateToPrevPage() {
+    if (!window.storyPagination) return;
     
-    // Clear any previous merchandise selections
-    currentState.order.merchandise = [];
-    document.querySelectorAll('.quantity-input').forEach(input => {
-        input.value = 0;
-    });
-    
-    const total = currentState.order.price + currentState.order.shipping;
-    document.getElementById('orderTotal').textContent = `$${total.toFixed(2)}`;
-    
-    // Reset tabs to pricing tab
-    if (document.querySelectorAll('.tab')) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        
-        document.querySelector('.tab[data-tab="pricing"]').classList.add('active');
-        document.getElementById('pricing-tab').classList.add('active');
-    }
-    
-    // Clear merchandise items display
-    const merchandiseItems = document.getElementById('merchandiseItems');
-    if (merchandiseItems) {
-        merchandiseItems.innerHTML = '';
+    const newPage = window.storyPagination.currentPage - 1;
+    if (newPage >= 0) {
+        displayStoryPage(newPage);
     }
 }
 
-// Process payment
-function processPayment() {
-    // In a real app, this would call a payment API
-    setTimeout(() => {
-        // Add the book to the library
-        addBookToLibrary();
+// Navigate to the next page
+function navigateToNextPage() {
+    if (!window.storyPagination) return;
+    
+    const newPage = window.storyPagination.currentPage + 1;
+    if (newPage < window.storyPagination.totalPages) {
+        displayStoryPage(newPage);
+    }
+}
+
+// Call OpenAI's Chat API (GPT-3.5)
+async function callChatGPT(apiKey, prompt) {
+    try {
+        console.log('Making API call to OpenAI...');
         
-        // Update order confirmation
-        document.getElementById('confirmationName').textContent = currentState.childData.name;
-        document.getElementById('confirmationTitle').textContent = currentState.order.bookTitle;
-        document.getElementById('confirmationFormat').textContent = currentState.order.format;
+        // Basic validation of API key format
+        if (!apiKey || !apiKey.trim().startsWith('sk-') || apiKey.trim().length < 20) {
+            throw new Error('Invalid API key format. OpenAI API keys should start with "sk-" and be at least 20 characters long.');
+        }
+
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey.trim()}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-3.5-turbo-0125',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are a children\'s story author specializing in educational stories that support cognitive development.'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.7
+            })
+        });
         
-        // Display merchandise items
-        const confirmationMerchandise = document.getElementById('confirmationMerchandise');
-        if (confirmationMerchandise) {
-            confirmationMerchandise.innerHTML = '';
-            
-            if (currentState.order.merchandise.length > 0) {
-                currentState.order.merchandise.forEach(item => {
-                    const merchItem = document.createElement('div');
-                    merchItem.className = 'order-item';
-                    
-                    const itemName = item.item.charAt(0).toUpperCase() + item.item.slice(1);
-                    merchItem.textContent = `${itemName} (${item.quantity}) - $${item.price.toFixed(2)}`;
-                    
-                    confirmationMerchandise.appendChild(merchItem);
-                });
-            } else {
-                confirmationMerchandise.innerHTML = '<p><em>No merchandise items selected</em></p>';
+        console.log('API response received, status:', response.status);
+        
+        // Check for HTTP errors
+        if (!response.ok) {
+            // Try to get error details from the response
+            try {
+                // Special case for 401 errors
+                if (response.status === 401) {
+                    throw new Error('Authentication error (401): Your API key is invalid or has expired. Please check your OpenAI API key and try again.');
+                }
+                
+                const errorData = await response.json();
+                if (errorData.error) {
+                    throw new Error(`OpenAI API error: ${errorData.error.message || errorData.error.type || 'Unknown error'}`);
+                } else {
+                    throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+                }
+            } catch (jsonError) {
+                // If we can't parse JSON, use the status text
+                // If it's a 401 error, provide a specific message
+                if (response.status === 401) {
+                    throw new Error('Authentication error (401): Your API key is invalid or has expired. Please check your OpenAI API key and try again.');
+                }
+                throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
             }
         }
         
-        const total = currentState.order.price + currentState.order.shipping + 
-            currentState.order.merchandise.reduce((sum, item) => sum + item.price, 0);
-        document.getElementById('confirmationTotal').textContent = `$${total.toFixed(2)}`;
+        const data = await response.json();
+        console.log('API response data:', data);
         
-        // Navigate to confirmation page
-        navigateTo('confirmation');
-    }, 1500);
+        if (data.error) {
+            throw new Error(`OpenAI API error: ${data.error.message || data.error.type || 'Unknown error'}`);
+        }
+        
+        if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+            throw new Error('Invalid response from OpenAI API: No message content found');
+        }
+        
+        return data.choices[0].message.content.trim();
+    } catch (error) {
+        console.error('Error calling OpenAI API:', error);
+        throw error; // Rethrow to be handled by the main try/catch block
+    }
 }
 
-// Add book to library
-function addBookToLibrary() {
-    const newBook = {
-        title: currentState.story.title,
-        type: currentState.story.type,
-        childName: currentState.childData.name,
-        date: new Date(),
-        format: currentState.order.format,
-        content: currentState.story.content
-    };
-    
-    currentState.library.push(newBook);
-    
-    // In a real app, this would update the library UI
-    console.log('Book added to library:', newBook);
+// Generate image with DALL-E
+async function generateImageWithDALLE(apiKey, prompt) {
+    try {
+        console.log('Making API call to DALL-E...');
+        
+        // Basic validation of API key format
+        if (!apiKey || !apiKey.trim().startsWith('sk-') || apiKey.trim().length < 20) {
+            throw new Error('Invalid API key format. OpenAI API keys should start with "sk-" and be at least 20 characters long.');
+        }
+        
+        const response = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey.trim()}`
+            },
+            body: JSON.stringify({
+                model: "dall-e-3",
+                prompt: prompt,
+                n: 1,
+                size: '1024x1024'
+            })
+        });
+        
+        console.log('DALL-E API response received, status:', response.status);
+        
+        // Check for HTTP errors
+        if (!response.ok) {
+            // Try to get error details from the response
+            try {
+                // Special case for 401 errors
+                if (response.status === 401) {
+                    throw new Error('Authentication error (401): Your API key is invalid or has expired. Please check your OpenAI API key and try again.');
+                }
+                
+                const errorData = await response.json();
+                if (errorData.error) {
+                    throw new Error(`DALL-E API error: ${errorData.error.message || errorData.error.type || 'Unknown error'}`);
+                } else {
+                    throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+                }
+            } catch (jsonError) {
+                // If we can't parse JSON, use the status text
+                // If it's a 401 error, provide a specific message
+                if (response.status === 401) {
+                    throw new Error('Authentication error (401): Your API key is invalid or has expired. Please check your OpenAI API key and try again.');
+                }
+                throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+            }
+        }
+        
+        const data = await response.json();
+        console.log('DALL-E API response data:', data);
+        
+        if (data.error) {
+            throw new Error(`DALL-E API error: ${data.error.message || data.error.type || 'Unknown error'}`);
+        }
+        
+        if (!data.data || !data.data[0] || !data.data[0].url) {
+            throw new Error('Invalid response from DALL-E API: No image URL found');
+        }
+        
+        return data.data[0].url;
+    } catch (error) {
+        console.error('Error generating image:', error);
+        console.log('Falling back to placeholder image');
+        // For image generation, we can use a fallback and not throw an error
+        return 'https://placeholder.pics/svg/500x300/DEDEDE/555555/Image%20Generation%20Error';
+    }
 }
 
-// Reset story state
-function resetStoryState() {
-    currentState.story = {
-        title: '',
-        type: '',
-        content: [],
-        currentPage: 0
-    };
+// Library Functions
+function saveToLibrary() {
+    if (!window.currentStoryData) {
+        alert('No story data to save!');
+        return;
+    }
     
-    // Reset order to default values
-    currentState.order = {
-        bookTitle: '',
-        format: 'digital',
-        price: 14.99,
-        shipping: 0.00,
-        merchandise: []
-    };
+    // Get current library or initialize new one
+    let library = JSON.parse(localStorage.getItem('bookids_library') || '[]');
     
-    // Reset additional characters
-    currentState.childData.additionalCharacters = {
-        sibling: { included: false, name: '', relation: '' },
-        pet: { included: false, name: '', type: '' },
-        friend: { included: false, name: '' }
-    };
+    // Add the current story
+    library.push(window.currentStoryData);
+    
+    // Save back to localStorage
+    localStorage.setItem('bookids_library', JSON.stringify(library));
+    
+    alert('Story saved to your library!');
+    
+    // Update library view if it's visible
+    if (document.getElementById('library-view').style.display !== 'none') {
+        updateLibraryView();
+    }
 }
 
-// Start the app when document is ready
-document.addEventListener('DOMContentLoaded', initApp); 
+function loadLibrary() {
+    const library = JSON.parse(localStorage.getItem('bookids_library') || '[]');
+    return library;
+}
+
+function updateLibraryView() {
+    const library = loadLibrary();
+    const libraryGrid = document.getElementById('library-grid');
+    const libraryEmpty = document.getElementById('library-empty');
+    
+    if (library.length === 0) {
+        libraryGrid.style.display = 'none';
+        libraryEmpty.style.display = 'block';
+        return;
+    }
+    
+    libraryGrid.style.display = 'grid';
+    libraryEmpty.style.display = 'none';
+    
+    // Clear current library grid
+    libraryGrid.innerHTML = '';
+    
+    // Add each book to the grid
+    library.forEach((book, index) => {
+        const card = document.createElement('div');
+        card.className = 'library-card';
+        card.onclick = () => openBook(index);
+        
+        card.innerHTML = `
+            <div class="library-card-cover">
+                <img src="${book.imageUrl}" alt="${book.title}" />
+                <button class="delete-book-btn" onclick="deleteBook(${index}, event)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="library-card-info">
+                <h3 class="library-card-title">${book.title}</h3>
+                <div class="library-card-meta">
+                    <span>For: ${book.meta.childName}</span>
+                    <span>Age: ${book.meta.childAge}</span>
+                </div>
+            </div>
+        `;
+        
+        libraryGrid.appendChild(card);
+    });
+}
+
+function openBook(index) {
+    const library = loadLibrary();
+    if (!library[index]) return;
+    
+    const book = library[index];
+    
+    // First show the story result view to ensure DOM elements are available
+    document.getElementById('library-view').style.display = 'none';
+    document.getElementById('story-result').style.display = 'block';
+    
+    // Set the current story data
+    window.currentStoryData = book;
+    
+    // Display the story title
+    document.getElementById('story-title').textContent = book.title;
+    
+    // Split the content into paragraphs for pagination
+    const paragraphs = book.content.split('\n\n').filter(para => para.trim());
+    
+    // Store paragraphs and current page
+    window.storyPagination = {
+        paragraphs: paragraphs,
+        currentPage: 0,
+        totalPages: paragraphs.length
+    };
+    
+    // Set the illustration first
+    document.getElementById('story-illustration').src = book.imageUrl;
+    
+    // Add cognitive details
+    const cognitiveDetailsContainer = document.getElementById('cognitive-details');
+    if (cognitiveDetailsContainer) {
+        cognitiveDetailsContainer.innerHTML = '';
+        
+        // Cognitive areas might be just names in saved stories
+        if (book.meta.cognitiveAreas) {
+            book.meta.cognitiveAreas.forEach(areaName => {
+                const detailCard = document.createElement('div');
+                detailCard.className = 'cognitive-detail-card';
+                detailCard.innerHTML = `<h4>${areaName}</h4>`;
+                cognitiveDetailsContainer.appendChild(detailCard);
+            });
+        }
+    }
+    
+    // Setup pagination controls
+    setupPaginationControls();
+    
+    // Display the first page - do this last after controls are setup
+    displayStoryPage(0);
+}
+
+// New function to display error messages in a more user-friendly way
+function showErrorMessage(message) {
+    // If we have a modal element for errors, use it
+    const errorModal = document.getElementById('error-modal');
+    
+    if (errorModal) {
+        const errorContent = document.getElementById('error-content');
+        if (errorContent) {
+            // Format the message with HTML
+            const formattedMessage = message.replace(/\n/g, '<br>');
+            errorContent.innerHTML = formattedMessage;
+        }
+        errorModal.style.display = 'flex';
+    } else {
+        // Fallback to alert if no modal is available
+        alert(message);
+    }
+}
+
+// Save user preferences for future story generation
+function saveUserPreferences(preferences) {
+    localStorage.setItem('bookids_preferences', JSON.stringify(preferences));
+}
+
+// Load user preferences
+function loadUserPreferences() {
+    const preferences = JSON.parse(localStorage.getItem('bookids_preferences') || '{}');
+    return preferences;
+}
+
+// Apply saved preferences to form fields
+function applyUserPreferences() {
+    const preferences = loadUserPreferences();
+    if (Object.keys(preferences).length === 0) return;
+    
+    // Apply preferences to form fields
+    if (preferences.childName) {
+        document.getElementById('child-name').value = preferences.childName;
+    }
+    
+    if (preferences.childGender) {
+        document.querySelectorAll('.toggle-option').forEach(option => {
+            if (option.textContent === preferences.childGender) {
+                document.querySelectorAll('.toggle-option').forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+            }
+        });
+    }
+    
+    if (preferences.childAge) {
+        const ageSlider = document.getElementById('age-slider');
+        if (ageSlider) {
+            ageSlider.value = preferences.childAge;
+            document.querySelector('.slider-value').textContent = preferences.childAge;
+        }
+    }
+    
+    if (preferences.selectedInterests && preferences.selectedInterests.length) {
+        document.querySelectorAll('.interest-option').forEach(option => {
+            if (preferences.selectedInterests.includes(option.textContent)) {
+                option.classList.add('selected');
+            }
+        });
+    }
+    
+    if (preferences.customPrompt) {
+        document.getElementById('custom-prompt').value = preferences.customPrompt;
+    }
+    
+    // Add saved characters to the UI
+    if (preferences.characters && preferences.characters.length) {
+        const charactersContainer = document.getElementById('characters-container');
+        if (charactersContainer) {
+            // Clear any existing character inputs first
+            charactersContainer.innerHTML = '';
+            
+            // Add each saved character
+            preferences.characters.forEach(character => {
+                const characterId = Date.now() + Math.floor(Math.random() * 1000); // Unique ID
+                const characterDiv = document.createElement('div');
+                characterDiv.className = 'character-input-group';
+                characterDiv.dataset.id = characterId;
+                
+                characterDiv.innerHTML = `
+                    <input type="text" class="text-input character-input" placeholder="Character name and description" value="${character}">
+                    <button type="button" class="remove-character-btn" onclick="removeCharacter(${characterId})">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                `;
+                
+                charactersContainer.appendChild(characterDiv);
+            });
+        }
+    }
+}
+
+// Delete a book from the library
+function deleteBook(index, event) {
+    // Stop the click event from bubbling up to parent elements
+    event.stopPropagation();
+    
+    // Confirm deletion
+    if (confirm('Are you sure you want to delete this book from your library?')) {
+        // Get current library
+        let library = loadLibrary();
+        
+        // Remove the book at the specified index
+        library.splice(index, 1);
+        
+        // Save the updated library
+        localStorage.setItem('bookids_library', JSON.stringify(library));
+        
+        // Update the library view
+        updateLibraryView();
+    }
+} 

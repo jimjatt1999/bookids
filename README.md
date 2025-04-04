@@ -1,69 +1,53 @@
-# Bookids
+# Bookids - Kids Story Generator
 
-Bookids is an interactive web application that creates personalized children's stories based on a child's interests. 
+A demo application that generates personalized children's stories focused on cognitive development.
+
+## Overview
+
+This is a proof-of-concept web application that demonstrates how AI can be used to create personalized children's stories that target specific cognitive development areas. Parents can input their child's details, select areas of cognitive development to focus on, and choose an art style for illustrations.
 
 ## Features
 
-- Simple onboarding that collects information about the child
-- Generation of personalized stories using LLM technology
-- Clean, kid-friendly UI with animations
-- Book preview with page navigation
-- Responsive design for tablet devices
+- Input child's information (name, gender, age)
+- Select child's interests from predefined options
+- Choose cognitive development areas to focus on (e.g., emotional recognition, problem-solving)
+- Select preferred art style for illustrations
+- Generate a personalized story with illustrations
 
-## Technical Overview
+## Demo Usage
 
-This demo uses:
-- HTML5/CSS3/JavaScript for the frontend
-- Node.js Express server for the backend
-- Integration with Ollama's gemma3:4b model for story generation
-- No frontend dependencies - pure vanilla frontend code
+This demo uses a mock implementation instead of making actual API calls to OpenAI. In a full implementation, it would use:
+- OpenAI's GPT models for story generation
+- DALL-E for image generation
 
-## Setup
+## Setup Instructions
 
-### Prerequisites
+1. Clone this repository
+2. Open the `index.html` file in your browser
+3. Try out the demo by entering information and clicking through the workflow
 
-1. Node.js (v14 or higher)
-2. Ollama installed with the gemma3:4b model
+## Files in this Project
 
-### Installation
+- `index.html` - Main HTML file with the application structure
+- `styles.css` - CSS styling for the application
+- `script.js` - JavaScript code that handles the application logic
+- `icons/` - Directory containing SVG icons for the sidebar
 
-1. Install dependencies:
-   ```
-   npm install
-   ```
+## Implementation Notes
 
-2. Ensure Ollama is running with gemma3:4b model:
-   ```
-   ollama run gemma3:4b
-   ```
-
-3. To run the application:
-   ```
-   npm start
-   ```
-
-4. Open your browser and navigate to `http://localhost:3000`
-
-## Using the LLM
-
-By default, the application uses a simulated story generator to avoid requiring Ollama. To enable the actual LLM:
-
-1. Make sure Ollama is running with the gemma3:4b model
-2. Edit `script.js` and change `USE_REAL_LLM` to `true`
-3. Refresh the page and try creating a story
+- This is a frontend-only implementation
+- In a production environment, API calls would be made server-side
+- The OpenAI key input is included for demonstration but would be handled more securely in a real application
+- The story generation logic currently uses mock data instead of actual API calls
 
 ## Future Enhancements
 
-- Actual integration with LLM (Ollama/gemma3:4b)
-- Image generation for story illustrations
-- User accounts and saved stories
-- Payment processing
-- PDF export for generated books
+- Server-side implementation for secure API key handling
+- More cognitive development areas
+- Customizable characters and settings
+- Audio narration option
+- Progress tracking for cognitive development areas
 
-## Project Structure
+## License
 
-- `index.html` - Main application HTML
-- `styles.css` - Styling and animations
-- `script.js` - Application logic and story generation
-- `server.js` - Express server for Ollama integration
-- `package.json` - Node.js dependencies 
+This project is created for demonstration purposes only. 
