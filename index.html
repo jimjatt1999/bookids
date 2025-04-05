@@ -522,31 +522,63 @@
                  </div>
             </div>
             
-            <!-- Step 8: Preview the Book -->
-            <div id="step-8-preview" class="content-panel workflow-step preview-page-container"> 
-                <h1>Preview Your Book</h1>
-                <p class="subtitle">Here's a sneak peek of your generated story.</p>
+            <!-- Step 8: Book Preview/Confirmation -->
+            <div id="step-8-preview" class="content-panel workflow-step preview-page-container">
+                <h1>Review Your Story Concept</h1>
+                 <p class="subtitle">Here's a summary of your choices. We'll generate the full story and illustrations after you confirm.</p>
                 
-                <div id="book-preview-area">
-                    <!-- Preview content will be injected here by JS -->
-                    <div class="preview-placeholder">Generating preview...</div>
+                <div class="prompt-preview">
+                    <h3>Generated Story Prompt:</h3>
+                    <div id="structured-prompt" class="prompt-box">Loading prompt...</div>
+                    <!-- Add Edit/Save buttons for the prompt -->
+                    <div class="prompt-edit-controls">
+                        <textarea id="prompt-edit-textarea" class="text-input prompt-edit-area" style="display: none;"></textarea>
+                        <button id="save-prompt-button" class="save-button small" style="display: none;">Save Edited Prompt</button>
+                        <button id="edit-prompt-button" class="edit-button small">Edit Prompt</button>
+                    </div>
                 </div>
-                
-                <div class="preview-controls">
-                    <button id="regenerate-preview-button" class="preview-btn regenerate">Regenerate Preview</button>
-                    <div class="preview-pagination">
-                        <button id="preview-prev-button" class="preview-btn nav" disabled>&larr; Previous</button>
-                        <span id="preview-page-indicator">Page X of Y</span>
-                        <button id="preview-next-button" class="preview-btn nav" disabled>Next &rarr;</button>
-            </div>
-        </div>
+
+                <!-- Sample Preview Image -->
+                <div class="preview-image-placeholder">
+                    <h3>Illustration Preview (Example)</h3>
+                    <!-- Use one of the provided sample images -->
+                    <img id="preview-sample-image" src="samplebooks/1.png" alt="Sample Book Illustration" style="max-width: 300px; border-radius: 8px; margin: 10px auto; display: block; box-shadow: var(--shadow);">
+                    <small>Selected Style: <span id="preview-style-name">Watercolor Illustration</span></small> 
+                </div>
 
                 <div class="button-container preview-button-container">
-                    <button class="back-button" onclick="navigateToStep('step-7-login')">Back</button> 
-                    <button class="next-button save-library-button" onclick="navigateToStep('step-10-library')">Save to Library</button> 
+                    <button class="back-button" onclick="navigateToStep('step-6-customize')">Back to Customize</button>
+                    <!-- This button now goes to the subscription step -->
+                    <button id="confirm-generation-button" class="next-button save-library-button">Confirm & Proceed</button> 
                 </div>
             </div>
-            
+
+            <!-- Step 9: Subscription Offer -->
+            <div id="step-9-subscribe" class="content-panel workflow-step">
+                <h1>Unlock Unlimited Stories!</h1>
+                <p class="subtitle">Choose a plan to save your stories and generate more.</p>
+
+                <div class="purchase-options-container">
+                    <div class="purchase-option">
+                        <h3>Monthly Plan</h3>
+                        <div class="price">$19.99<span class="per-month">/month</span></div>
+                        <p class="description">Generate unlimited stories, save to your library, access all features.</p>
+                        <button class="purchase-btn primary" onclick="handleSubscription('monthly')">Subscribe Now</button>
+                    </div>
+                    <div class="purchase-option">
+                        <h3>Pay Per Story</h3>
+                        <div class="price">£9.99<span class="per-month">/generation</span></div>
+                        <p class="description">Generate and save this single story. Perfect for trying it out.</p>
+                        <button class="purchase-btn secondary" onclick="handleSubscription('single')">Pay for this Story</button>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <button class="back-button" onclick="navigateToStep('step-8-preview')">Back to Preview</button>
+                    <!-- No 'Next' needed here, action is via subscribe buttons -->
+                </div>
+            </div>
+
             <!-- Step 10: Accessing the Library/Home -->
             <div id="step-10-library" class="content-panel workflow-step">
                 <div class="library-header">

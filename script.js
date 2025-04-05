@@ -701,6 +701,23 @@ function populateConfirmationDetails() {
     // We will now generate and display the structured prompt
     setText('confirm-custom-prompt', userResponses.customPrompt || 'None'); // Need an element with id="confirm-custom-prompt"
 
+    // Update preview image and style name on confirmation step
+    const previewImage = document.getElementById('preview-sample-image');
+    const styleNameSpan = document.getElementById('preview-style-name');
+    if (previewImage) {
+        // Cycle through sample images based on selected style (simple example)
+        const sampleImages = ['samplebooks/1.png', 'samplebooks/2.png', 'samplebooks/3.png', 'samplebooks/4.png'];
+        const styleIndex = Math.abs(userResponses.storyStyle.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % sampleImages.length;
+        previewImage.src = sampleImages[styleIndex] || sampleImages[0];
+    }
+    if (styleNameSpan) {
+        // Capitalize first letter of each word in the style name
+        const formattedStyle = userResponses.storyStyle
+            .replace(/-/g, ' ')
+            .replace(/\b\w/g, l => l.toUpperCase());
+        styleNameSpan.textContent = formattedStyle || 'Not Selected';
+    }
+
     // --- Generate and Display Structured Prompt ---
     const structuredPromptText = generateStructuredPrompt();
     const promptBox = document.getElementById('structured-prompt');
@@ -713,6 +730,11 @@ function populateConfirmationDetails() {
     // --- Display Avatar Preview? (More complex) ---
     // Could potentially display the selected skin tone or base avatar index
     // Example: setText('confirm-avatar-skin', userResponses.avatar.skinTone);
+
+    // Handle progress bar and body class updates
+    updateProgressBar(stepId);
+
+    return true;
 }
 
 // ---------- Generate Structured Prompt ----------
@@ -819,31 +841,47 @@ function generateStructuredPrompt() {
 
 // ---------- Setup Edit/Save Prompt Buttons ----------
 function setupPromptEditing() {
-    const editButton = document.getElementById('edit-prompt-button');
-    const saveButton = document.getElementById('save-prompt-button');
     const promptBox = document.getElementById('structured-prompt');
-    const promptEditArea = document.getElementById('prompt-edit-textarea');
+    const editButton = document.getElementById('edit-prompt-button');
+    const editArea = document.getElementById('prompt-edit-textarea');
+    const saveButton = document.getElementById('save-prompt-button');
+    const confirmButton = document.getElementById('confirm-generation-button');
 
-    if (editButton && saveButton && promptBox && promptEditArea) {
+    // Edit button toggles visibility
+    if (editButton && editArea && saveButton && promptBox) {
         editButton.addEventListener('click', () => {
-            promptBox.style.display = 'none';
-            editButton.style.display = 'none';
-            promptEditArea.style.display = 'block';
-            saveButton.style.display = 'inline-block';
-            promptEditArea.value = promptBox.textContent; // Ensure textarea has latest content
-            promptEditArea.focus();
+            const isEditing = editArea.style.display === 'block';
+            if (!isEditing) {
+                editArea.value = promptBox.textContent; // Populate textarea
+            }
+            promptBox.style.display = isEditing ? 'block' : 'none';
+            editArea.style.display = isEditing ? 'none' : 'block';
+            saveButton.style.display = isEditing ? 'none' : 'inline-block';
+            editButton.textContent = isEditing ? 'Edit Prompt' : 'Cancel Edit';
         });
+    }
 
+    // Save button updates promptBox and hides editor
+    if (saveButton && editArea && promptBox && editButton) {
         saveButton.addEventListener('click', () => {
-            const editedPrompt = promptEditArea.value;
-            promptBox.textContent = editedPrompt;
-            userResponses.customPrompt = editedPrompt; // Save the *entire* edited prompt
-            
+            promptBox.textContent = editArea.value;
+            // Potentially update userResponses.customPrompt or a new dedicated field
+            userResponses.finalPrompt = editArea.value; // Example: store final edited prompt
+            console.log("Prompt manually edited and saved.");
+
+            // Hide editor
             promptBox.style.display = 'block';
-            editButton.style.display = 'inline-block';
-            promptEditArea.style.display = 'none';
+            editArea.style.display = 'none';
             saveButton.style.display = 'none';
-            console.log("Custom prompt saved.");
+            editButton.textContent = 'Edit Prompt';
+        });
+    }
+
+    // Confirmation Button - Navigate to Subscription Step
+    if (confirmButton) {
+        confirmButton.addEventListener('click', () => {
+            // Navigate to the subscription step instead of final generation/library
+            navigateToStep('step-9-subscribe');
         });
     }
 }
@@ -896,4 +934,30 @@ function closeErrorModal() {
     if (errorModal) {
         errorModal.style.display = 'none';
     }
-} 
+}
+
+// --- Placeholder Subscription Handling ---
+function handleSubscription(planType) {
+    console.log(`Subscription selected: ${planType}`);
+    const loadingIndicator = document.getElementById('loading');
+    
+    // Show loading indicator
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'flex';
+    }
+
+    // Simulate payment processing delay (e.g., 2.5 seconds)
+    setTimeout(() => {
+        // Hide loading indicator
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
+
+        // Show success message (simple alert for now)
+        alert(`Payment successful! Your story based on the '${planType}' plan is being saved to your library.`);
+
+        // Navigate to library after confirmation
+        navigateToStep('step-10-library'); 
+
+    }, 2500); // 2.5 second delay
+}

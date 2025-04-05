@@ -2737,17 +2737,19 @@ small a:hover {
 }
 
 .feature-card {
-    background-color: #f8f9ff;
-    padding: 1.5rem;
-    border-radius: 12px;
+    background-color: var(--white) !important; /* Force white background */
+    padding: 2.5rem 1.8rem; 
+    border-radius: 20px; 
     text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); 
+    border: 1px solid #f0f0f0; 
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-image: none !important; /* Ensure no background image/gradient */
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(90, 106, 207, 0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06); /* Subtle hover shadow */
 }
 
 .feature-icon {
@@ -2756,13 +2758,17 @@ small a:hover {
 }
 
 .feature-card h3 {
-    margin-bottom: 0.75rem;
-    color: var(--primary-color);
+    color: #1f2937; /* Darker blue-gray for strong contrast */
+    font-size: 1.2rem; 
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 0.6rem;
 }
 
 .feature-card p {
-    color: var(--dark-gray);
-    line-height: 1.5;
+    font-size: 0.9rem; 
+    color: #4b5563; /* Slightly darker gray for readability */
+    line-height: 1.6;
 }
 
 .welcome-steps {
@@ -2908,16 +2914,17 @@ small a:hover {
 }
 
 .prompt-box {
-    background-color: #2a2a42;
-    color: #eaeaea;
-    font-family: monospace;
-    padding: 1.25rem;
+    white-space: pre-wrap; /* Ensure newlines are rendered */
+    max-height: 400px; /* Limit height */
+    overflow-y: auto; /* Add scrollbar if needed */
+    padding: 15px;
+    background-color: var(--light-gray);
     border-radius: 8px;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    font-size: 0.9rem;
+    margin-top: 10px;
+    font-family: monospace; /* Optional: Use monospace for prompt */
+    font-size: 0.9em;
     line-height: 1.5;
-    min-height: 100px; /* Ensure some height */
+    text-align: left;
 }
 
 .prompt-edit-area {
@@ -4095,11 +4102,27 @@ small a:hover {
 }
 
 #step-1-landing h1 {
-    font-size: 2.8rem; /* Slightly larger */
+    font-size: 2.8rem; 
     font-weight: 700;
     /* Keep gradient */
-    margin-bottom: 1rem; /* Reduced margin */
-    animation: fadeInUp 1.2s ease-out;
+    margin-bottom: 1rem; 
+    animation: fadeInUp 1.2s ease-out, pulse-text 2.5s infinite ease-in-out; /* Added pulse */
+}
+
+/* Add Keyframes for pulse-text */
+@keyframes pulse-text {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.03);
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 #step-1-landing .subtitle {
@@ -4120,18 +4143,19 @@ small a:hover {
 }
 
 .feature-card {
-    background-color: var(--white);
-    padding: 2.5rem 1.8rem; /* Increased padding */
-    border-radius: 20px; /* Even more rounded */
+    background-color: var(--white) !important; /* Force white background */
+    padding: 2.5rem 1.8rem; 
+    border-radius: 20px; 
     text-align: center;
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.04); /* Softer shadow */
-    border: 1px solid #ededed; /* Lighter border */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); 
+    border: 1px solid #f0f0f0; 
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-image: none !important; /* Ensure no background image/gradient */
 }
 
 .feature-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07); /* Slightly more pronounced hover shadow */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06); /* Subtle hover shadow */
 }
 
 /* Subtle Gradients */
@@ -4918,4 +4942,79 @@ body:not(.on-step-1) .global-progress-container {
 #step-6-customize .button-container,
 #step-6b-confirmation .button-container {
     margin-top: 2.5rem; /* Adjust as needed for visual balance */
+}
+
+/* Enhanced Selection UX with Checkmarks */
+
+.cognitive-card,
+.art-style-card,
+.interest-option {
+    position: relative; /* Needed for pseudo-element positioning */
+    /* Keep existing transition, padding, border, etc. */
+}
+
+/* Base style for the checkmark (hidden) */
+.cognitive-card::after,
+.art-style-card::after,
+.interest-option::after {
+    content: '\2714'; /* Unicode checkmark */
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background-color: var(--primary-color); /* Use primary color */
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 22px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 2; /* Ensure it's above card content if needed */
+}
+
+/* Show checkmark when active/selected */
+.cognitive-card.selected::after, /* Use .selected for cognitive */
+.art-style-card.selected::after, /* Use .selected for art style */
+.interest-option.active::after { /* Use .active for interest */
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Optional: Slightly dim non-selected items when siblings are selected */
+/* This requires JS to add a class to the container when items are selected */
+/* Example CSS if a class 'has-selection' is added to the grid container: */
+/*
+.cognitive-grid.has-selection .cognitive-card:not(.selected),
+.art-style-grid.has-selection .art-style-card:not(.selected),
+.interests-grid.has-selection .interest-option:not(.active) {
+    opacity: 0.7;
+    box-shadow: none; 
+}
+*/
+
+/* Remove old border/background selection style if desired */
+/* Keep the existing border style for hover, but override for selected */
+.cognitive-card.selected,
+.art-style-card.selected,
+.interest-option.active {
+   border-color: var(--primary-color); /* Keep primary border */
+   box-shadow: 0 6px 16px rgba(90, 106, 207, 0.15); /* Keep subtle shadow */
+   /* Remove background color change if previously added */
+   /* background-color: var(--white); */ 
+}
+
+/* Adjustments for interest options (smaller cards) */
+.interest-option::after {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    line-height: 18px;
+    top: 5px;
+    right: 5px;
 }
