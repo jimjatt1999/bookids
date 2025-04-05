@@ -48,18 +48,15 @@
                     <p class="subtitle">Answer a few simple questions to create a unique, personalized storybook.</p>
                     
                     <div class="welcome-features">
-                        <div class="feature-card">
-                            <div class="feature-icon feature-icon-personalize"></div>
+                        <div class="feature-card feature-card-1">
                             <h3>Personalized Characters</h3>
                             <p>Create avatars for your child and family members.</p>
                         </div>
-                        <div class="feature-card">
-                            <div class="feature-icon feature-icon-brain"></div>
+                        <div class="feature-card feature-card-2">
                             <h3>Cognitive Boost</h3>
                             <p>Focus stories on areas like memory, focus, or problem-solving.</p>
                         </div>
-                        <div class="feature-card">
-                            <div class="feature-icon feature-icon-art"></div>
+                        <div class="feature-card feature-card-3">
                             <h3>Beautiful Illustrations</h3>
                             <p>Choose from various art styles to bring the story to life.</p>
                         </div>
@@ -241,7 +238,7 @@
                         <div class="card-content">
                             <h3>Executive Function</h3>
                             <p>Foundational "air traffic control" skills of the brain.</p>
-                            <button class="learn-more">Learn more</button>
+                            <button class="learn-more" data-tooltip="Skills like planning, starting tasks, staying organized, and managing time.">Learn more</button>
                         </div>
                     </div>
                     
@@ -249,7 +246,7 @@
                         <div class="card-content">
                             <h3>Attention and Focus</h3>
                             <p>The ability to concentrate, sustain attention, and selectively attend stimuli.</p>
-                            <button class="learn-more">Learn more</button>
+                            <button class="learn-more" data-tooltip="Helps filter distractions and maintain concentration on tasks or listening.">Learn more</button>
                         </div>
                     </div>
                     
@@ -257,7 +254,7 @@
                         <div class="card-content">
                             <h3>Memory</h3>
                             <p>Involves encoding, storing, and retrieving information.</p>
-                            <button class="learn-more">Learn more</button>
+                            <button class="learn-more" data-tooltip="Working memory for holding information and long-term memory for recall.">Learn more</button>
                         </div>
                      </div>
                     
@@ -265,7 +262,7 @@
                         <div class="card-content">
                             <h3>Language and communication</h3>
                             <p>Central to thought, learning and social development.</p>
-                            <button class="learn-more">Learn more</button>
+                            <button class="learn-more" data-tooltip="Includes vocabulary, understanding grammar, expressing thoughts, and storytelling.">Learn more</button>
                         </div>
                     </div>
                     
@@ -273,7 +270,7 @@
                         <div class="card-content">
                             <h3>Reasoning and Problem Solving</h3>
                             <p>The ability to make sense of information and apply logic.</p>
-                            <button class="learn-more">Learn more</button>
+                            <button class="learn-more" data-tooltip="Using logic, critical thinking, and creativity to overcome challenges.">Learn more</button>
                         </div>
                      </div>
                     
@@ -281,14 +278,14 @@
                         <div class="card-content">
                             <h3>Conceptual Understanding</h3>
                             <p>Forming mental representations and categories.</p>
-                            <button class="learn-more">Learn more</button>
+                            <button class="learn-more" data-tooltip="Grasping abstract ideas, understanding categories, and making connections.">Learn more</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="button-container"> <!-- Button Container -->
                     <button class="back-button" onclick="navigateToStep('step-3-avatar')">Back</button>
-                    <button class="next-button modern-button" onclick="navigateToStep('step-5-illustration')">Next →</button>
+                    <button class="next-button" onclick="navigateToStep('step-5-illustration')">Next</button>
                 </div>
             </div>
             
@@ -788,6 +785,47 @@
                     </div>
                     <div class="modal-footer">
                         <button onclick="document.getElementById('error-modal').style.display='none'" class="modal-button">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Character Modal -->
+            <div id="add-character-modal" class="modal">
+                <div class="modal-content character-modal-content">
+                    <span class="close-button" onclick="closeAddCharacterModal()">&times;</span>
+                    <h2>Add New Character</h2>
+                    
+                    <div class="form-group">
+                        <label for="new-char-name">Character Name</label>
+                        <input type="text" id="new-char-name" placeholder="e.g., Luna the Cat" class="text-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-char-desc">Description / Relationship</label>
+                        <input type="text" id="new-char-desc" placeholder="e.g., Wise old family pet" class="text-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Character Image (Optional)</label>
+                        <div class="toggle-group avatar-source-toggle" id="new-char-source-toggle">
+                            <div class="toggle-option active" data-source="none">No Image</div>
+                            <div class="toggle-option" data-source="upload">Upload Image</div>
+                        </div>
+                    </div>
+
+                    <div id="new-char-upload-section" class="form-group avatar-upload-section" style="display: none;">
+                        <label for="new-char-upload-input">Upload Image (Max 2MB)</label>
+                        <input type="file" id="new-char-upload-input" accept="image/png, image/jpeg, image/webp">
+                        <div id="new-char-preview-container" class="avatar-preview-container">
+                            <img id="new-char-preview-image" src="#" alt="Character Preview" style="display: none;">
+                            <div id="new-char-preview-placeholder" class="avatar-preview-placeholder">+</div>
+                        </div>
+                        <small>Upload a picture of the character.</small>
+                    </div>
+
+                    <div class="modal-button-container">
+                        <button class="cancel-button" onclick="closeAddCharacterModal()">Cancel</button>
+                        <button id="save-new-character-btn" class="save-button">Save Character</button>
                     </div>
                 </div>
             </div>

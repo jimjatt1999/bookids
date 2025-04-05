@@ -19,13 +19,16 @@ let userResponses = {
     storyStyle: '', // Added to store illustration style
     storyTheme: '',
     readingLevel: 'intermediate',
-    additionalCharacters: [],
-    storyCharacters: [], // Added: Characters selected specifically for THIS story
+    // Stores ALL available characters (main avatar + added ones)
+    additionalCharacters: [], // Format: { id: string, name: string, description: string, imageData: string | null }
+    // Stores IDs of characters selected for the CURRENT story generation
+    storyCharacters: [], // Format: string[] (character IDs)
     customPrompt: ''
 };
 
 let currentStepId = 'step-1-landing'; // Keep track of current step
 const totalWorkflowSteps = 6; // Adjusted: Steps before login (0-6)
+let currentCharacterImage = null; // Temp storage for modal image data
 
 // ---------- Initialization ----------
 document.addEventListener('DOMContentLoaded', () => {
@@ -53,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setupPromptEditing(); 
+    setupCharacterModal();
 });
 
 // ---------- Navigation ----------
@@ -412,84 +416,251 @@ function setupFormInteractions() {
     });
     
     // Set up "Add Character" button if it exists
-    const addCharBtn = document.getElementById('add-character-btn');
-    if (addCharBtn) {
-        addCharBtn.addEventListener('click', addCharacter);
+    // const addCharBtn = document.getElementById('add-character-btn');
+    // if (addCharBtn) { ... }
+}
+
+// ---------- Character Modal & Management ----------
+
+let characterToEdit = null; // Used if we implement editing later
+
+function setupCharacterModal() {
+    const modal = document.getElementById('add-character-modal');
+    const saveBtn = document.getElementById('save-new-character-btn');
+    const sourceToggleOptions = modal.querySelectorAll('#new-char-source-toggle .toggle-option');
+    const uploadSection = document.getElementById('new-char-upload-section');
+    const uploadInput = document.getElementById('new-char-upload-input');
+    const previewImage = document.getElementById('new-char-preview-image');
+    const previewPlaceholder = document.getElementById('new-char-preview-placeholder');
+
+    // Source Toggle (No Image / Upload)
+    sourceToggleOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            sourceToggleOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+            const source = option.getAttribute('data-source');
+            uploadSection.style.display = (source === 'upload') ? 'block' : 'none';
+            if (source !== 'upload') {
+                currentCharacterImage = null; // Clear temp image if switching off upload
+                resetCharacterUploadPreview();
+            }
+        });
+    });
+
+    // Image Upload Input Handling
+    if (uploadInput && previewImage && previewPlaceholder) {
+        uploadInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                    showErrorModal('Image size exceeds 2MB limit.');
+                    uploadInput.value = ''; 
+                    resetCharacterUploadPreview();
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                    previewPlaceholder.style.display = 'none';
+                    currentCharacterImage = e.target.result; // Store base64 in temp var
+                }
+                reader.onerror = () => {
+                    showErrorModal('Error reading uploaded file.');
+                    currentCharacterImage = null;
+                    resetCharacterUploadPreview();
+                }
+                reader.readAsDataURL(file);
+            } else {
+                resetCharacterUploadPreview();
+            }
+        });
     }
+
+    // Save Button
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveCharacter);
+    }
+}
+
+function openAddCharacterModal() {
+    characterToEdit = null; // Reset edit state
+    document.getElementById('add-character-modal').style.display = 'flex';
+    // Reset form fields
+    document.getElementById('new-char-name').value = '';
+    document.getElementById('new-char-desc').value = '';
+    document.getElementById('new-char-source-toggle').querySelectorAll('.toggle-option').forEach((opt, index) => {
+        opt.classList.toggle('active', index === 0); // Default to 'No Image'
+    });
+    document.getElementById('new-char-upload-section').style.display = 'none';
+    resetCharacterUploadPreview();
+    currentCharacterImage = null;
+}
+
+function closeAddCharacterModal() {
+    document.getElementById('add-character-modal').style.display = 'none';
+}
+
+function resetCharacterUploadPreview() {
+    const uploadInput = document.getElementById('new-char-upload-input');
+    const previewImage = document.getElementById('new-char-preview-image');
+    const previewPlaceholder = document.getElementById('new-char-preview-placeholder');
+    if (uploadInput) uploadInput.value = '';
+    if (previewImage) {
+        previewImage.src = '#';
+        previewImage.style.display = 'none';
+    }
+    if (previewPlaceholder) previewPlaceholder.style.display = 'flex'; // Use flex if that's how it's centered
+}
+
+function saveCharacter() {
+    const nameInput = document.getElementById('new-char-name');
+    const descInput = document.getElementById('new-char-desc');
+    const name = nameInput.value.trim();
+    const description = descInput.value.trim();
+
+    if (!name) {
+        showErrorModal('Please enter a character name.');
+        nameInput.focus();
+        return;
+    }
+    if (!description) {
+        showErrorModal('Please enter a character description or relationship.');
+        descInput.focus();
+        return;
+    }
+
+    const newCharacter = {
+        id: `char-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`, // Unique ID
+        name: name,
+        description: description,
+        imageData: currentCharacterImage // Use the temp stored image data
+    };
+
+    // Add to the global list
+    userResponses.additionalCharacters.push(newCharacter);
+    console.log('Character saved:', newCharacter);
+    console.log('Updated additionalCharacters:', userResponses.additionalCharacters);
+
+    closeAddCharacterModal();
+    populateCharacterSelection(); // Refresh the grid in Step 6
+}
+
+function removeCharacter(characterId, event) {
+    event.stopPropagation(); // Prevent card selection when clicking remove button
+    console.log(`Attempting to remove character: ${characterId}`);
+    
+    // Filter out the character
+    userResponses.additionalCharacters = userResponses.additionalCharacters.filter(char => char.id !== characterId);
+    
+    // Also remove from the current story selection if present
+    userResponses.storyCharacters = userResponses.storyCharacters.filter(id => id !== characterId);
+
+    console.log('Updated additionalCharacters after removal:', userResponses.additionalCharacters);
+    populateCharacterSelection(); // Refresh the grid
 }
 
 // ---------- Populate Dynamic Content ----------
 function populateCharacterSelection() {
     console.log("Populating character selection...");
     const grid = document.getElementById('story-character-selection-grid');
-    const addButton = grid.querySelector('.add-new-char-card'); // Keep the add button
-    grid.innerHTML = ''; // Clear previous characters (except add button)
+    const addButtonTemplate = grid.querySelector('.add-new-char-card'); // Keep the template
+    grid.innerHTML = ''; // Clear previous content
 
-    // Add the main avatar first (assuming it's always included initially)
-    const mainAvatarData = userResponses.avatar;
-    const childName = userResponses.childInfo.name || "Child"; // Use placeholder if no name
-    
-    // --- Create Main Avatar Card ---
-    const mainAvatarCard = document.createElement('div');
-    mainAvatarCard.classList.add('character-select-card', 'active'); // Assume main avatar is active by default
-    mainAvatarCard.setAttribute('data-char-id', 'main-avatar');
-    
-    // Use uploaded image if available, otherwise use placeholder/preset logic
-    const imgContainer = document.createElement('div');
-    imgContainer.classList.add('char-select-img-container'); // Use consistent class
-    
-    if (mainAvatarData.source === 'upload' && mainAvatarData.uploadedImage) {
-        imgContainer.innerHTML = `<img src="${mainAvatarData.uploadedImage}" alt="${childName}" class="char-select-img">`;
-    } else {
-        // Placeholder or logic to generate SVG based on selection (base, skinTone, gender)
-        const bgColor = mainAvatarData.skinTone || '#e2b38f'; // Fallback skin tone
-        imgContainer.innerHTML = `<div class="char-select-img placeholder-avatar" style="background-color: ${bgColor};">(Avatar)</div>`; 
+    // --- Ensure Main Avatar exists in additionalCharacters ---
+    const mainAvatarId = 'main-avatar';
+    let mainAvatarExists = userResponses.additionalCharacters.some(char => char.id === mainAvatarId);
+
+    if (!mainAvatarExists && userResponses.childInfo.name) { // Only add if child name is set
+        const mainAvatarCharacter = {
+            id: mainAvatarId,
+            name: userResponses.childInfo.name,
+            description: 'Main Character',
+            imageData: userResponses.avatar.source === 'upload' ? userResponses.avatar.uploadedImage : null, // Use uploaded if available
+            // Store preset info if needed later for regeneration
+            presetBase: userResponses.avatar.source === 'select' ? userResponses.avatar.base : null,
+            presetSkin: userResponses.avatar.source === 'select' ? userResponses.avatar.skinTone : null
+        };
+        userResponses.additionalCharacters.unshift(mainAvatarCharacter); // Add to beginning
+        // Automatically select the main avatar for the story initially
+        if (!userResponses.storyCharacters.includes(mainAvatarId)) {
+            userResponses.storyCharacters.push(mainAvatarId);
+        }
+        console.log("Main avatar added/updated in additionalCharacters.");
+    } else if (mainAvatarExists) {
+         // Ensure main avatar is selected if it exists
+         if (!userResponses.storyCharacters.includes(mainAvatarId)) {
+            userResponses.storyCharacters.push(mainAvatarId);
+        }
     }
-    
-    const infoContainer = document.createElement('div');
-    infoContainer.classList.add('char-select-info');
-    infoContainer.innerHTML = `<span class="char-select-name">${childName}</span><span class="char-select-desc">Main Character</span>`;
-    
-    mainAvatarCard.appendChild(imgContainer);
-    mainAvatarCard.appendChild(infoContainer);
-    grid.appendChild(mainAvatarCard);
-    
-    // Add main avatar to story characters by default
-    userResponses.storyCharacters = [{ id: 'main-avatar', name: childName, type: 'Main Character' }];
 
-    // Add event listener for selection (including main avatar)
-    mainAvatarCard.addEventListener('click', () => {
-        mainAvatarCard.classList.toggle('active');
-        updateSelectedStoryCharacters(); // Update the list based on .active class
-    });
+    // --- Populate Grid from additionalCharacters ---
+    userResponses.additionalCharacters.forEach(char => {
+        const card = document.createElement('div');
+        card.classList.add('character-select-card');
+        card.setAttribute('data-char-id', char.id);
+        if (userResponses.storyCharacters.includes(char.id)) {
+            card.classList.add('active'); // Mark as active if selected for story
+        }
 
-    // Re-append the add button
-    if (addButton) {
-        grid.appendChild(addButton);
-        // TODO: Add event listener to the 'add' button to handle adding new characters
-        addButton.addEventListener('click', () => {
-            alert("Functionality to add new characters here is not yet implemented.");
-            // This could open a modal or navigate to another step
+        const imgContainer = document.createElement('div');
+        imgContainer.classList.add('char-select-img-container');
+        if (char.imageData) {
+            imgContainer.innerHTML = `<img src="${char.imageData}" alt="${char.name}" class="char-select-img">`;
+        } else if (char.id === mainAvatarId && char.presetSkin) {
+             // Placeholder for main avatar using preset skin tone if no image
+             imgContainer.innerHTML = `<div class="char-select-img placeholder-avatar" style="background-color: ${char.presetSkin};">(Avatar)</div>`;
+        } else {
+            // Generic placeholder
+             imgContainer.innerHTML = `<div class="char-select-img placeholder-avatar">?</div>`;
+        }
+
+        const infoContainer = document.createElement('div');
+        infoContainer.classList.add('char-select-info');
+        infoContainer.innerHTML = `<span class="char-select-name">${char.name}</span><span class="char-select-desc">${char.description}</span>`;
+
+        card.appendChild(imgContainer);
+        card.appendChild(infoContainer);
+
+        // Add Remove Button (except for main avatar)
+        if (char.id !== mainAvatarId) {
+            const removeBtn = document.createElement('button');
+            removeBtn.classList.add('remove-char-btn-grid');
+            removeBtn.innerHTML = '&times;'; // 'x' symbol
+            removeBtn.onclick = (event) => removeCharacter(char.id, event);
+            card.appendChild(removeBtn);
+        }
+
+        // Add click listener for selection/deselection
+        card.addEventListener('click', () => {
+            card.classList.toggle('active');
+            updateSelectedStoryCharacters(); // Update the list based on .active class
         });
-    }
-    
-    // TODO: Add logic here to populate with *additional* characters if they exist 
-    // in userResponses.additionalCharacters and add event listeners to them.
 
-    console.log("Initial story characters:", userResponses.storyCharacters);
+        grid.appendChild(card);
+    });
+    
+    // --- Re-append the Add Button --- 
+    if (addButtonTemplate) {
+        const addButton = addButtonTemplate.cloneNode(true); // Clone the template
+        addButton.style.display = 'flex'; // Ensure it's visible
+        addButton.addEventListener('click', openAddCharacterModal); // Attach listener
+        grid.appendChild(addButton);
+    }
+
+    console.log("Character selection grid populated.");
+    updateSelectedStoryCharacters(); // Initial update based on potentially added main avatar
 }
 
 function updateSelectedStoryCharacters() {
     userResponses.storyCharacters = [];
     document.querySelectorAll('#story-character-selection-grid .character-select-card.active').forEach(card => {
         const id = card.getAttribute('data-char-id');
-        if (id !== null && id !== 'add-new-story-character-btn') { // Exclude the add button itself
-             const name = card.querySelector('.char-select-name')?.textContent || 'Unknown';
-             const desc = card.querySelector('.char-select-desc')?.textContent || 'Character';
-            userResponses.storyCharacters.push({ id: id, name: name, type: desc });
+        if (id) { 
+            userResponses.storyCharacters.push(id);
         }
     });
-    console.log("Updated story characters:", userResponses.storyCharacters);
+    console.log("Updated storyCharacters (IDs):", userResponses.storyCharacters);
 }
 
 function populateConfirmationDetails() {
@@ -520,9 +691,11 @@ function populateConfirmationDetails() {
     setText('confirm-type', 'Standard');   // Placeholder
 
     // --- Avatar/Character Info ---
-    // Example: Display selected characters 
-    const charactersText = userResponses.storyCharacters.map(c => c.name).join(', ');
-    setText('confirm-characters', charactersText || 'None selected'); // Need an element with id="confirm-characters"
+    const selectedChars = userResponses.additionalCharacters.filter(char => 
+        userResponses.storyCharacters.includes(char.id)
+    );
+    const charactersText = selectedChars.map(c => c.name).join(', ');
+    setText('confirm-characters', charactersText || 'None selected'); 
 
     // --- Custom Prompt --- 
     // We will now generate and display the structured prompt
@@ -547,31 +720,33 @@ function generateStructuredPrompt() {
     console.log("Generating structured prompt from:", userResponses);
     let prompt = `Generate a personalized, engaging children's story suitable for a ${userResponses.childInfo.age}-year-old child. \n\n`;
 
-    // Main Character
-    prompt += `**Main Character:**\n`;
-    prompt += `- Name: ${userResponses.childInfo.name || 'The Child'}\n`;
-    prompt += `- Age: ${userResponses.childInfo.age}\n`;
-    prompt += `- Gender: ${userResponses.childInfo.gender}\n`;
-    if (userResponses.avatar.customization) {
-        prompt += `- Appearance Notes: ${userResponses.avatar.customization}\n`;
-    }
-    prompt += `\n`;
-
-    // Other Characters
-    if (userResponses.storyCharacters && userResponses.storyCharacters.length > 1) {
-        prompt += `**Other Characters Included:**\n`;
-        userResponses.storyCharacters.forEach(char => {
-            // Avoid duplicating the main character info if they are in the list separately
-            if (char.id !== 'main-avatar') { 
-                prompt += `- ${char.name} (${char.type || 'Character'})\n`;
-            }
-        });
+    // Main Character (Find from additionalCharacters using ID)
+    const mainAvatar = userResponses.additionalCharacters.find(char => char.id === 'main-avatar');
+    if (mainAvatar) {
+        prompt += `**Main Character:**\n`;
+        prompt += `- Name: ${mainAvatar.name}\n`;
+        prompt += `- Age: ${userResponses.childInfo.age}\n`; // Age is separate
+        prompt += `- Gender: ${userResponses.childInfo.gender}\n`; // Gender is separate
+        prompt += `- Description: ${mainAvatar.description}\n`;
+        if (mainAvatar.imageData) {
+             prompt += `- Appearance: Based on provided image.\n`;
+        } else if (userResponses.avatar.customization) { // Use customization text if no image
+             prompt += `- Appearance Notes: ${userResponses.avatar.customization}\n`;
+        }
         prompt += `\n`;
-    } else if (userResponses.additionalCharacters && userResponses.additionalCharacters.length > 0) {
-        // Fallback to additionalCharacters if storyCharacters only has the main avatar
+    }
+
+    // Other Characters (Filter from additionalCharacters based on storyCharacters, excluding main)
+    const otherStoryChars = userResponses.additionalCharacters.filter(char => 
+        userResponses.storyCharacters.includes(char.id) && char.id !== 'main-avatar'
+    );
+    if (otherStoryChars.length > 0) {
         prompt += `**Other Characters Included:**\n`;
-        userResponses.additionalCharacters.forEach(char => {
-             prompt += `- ${char.name} (${char.relation || 'Character'})\n`;
+        prompt += `Ensure these characters play a meaningful role in the story, interacting with the main character.\n`;
+        otherStoryChars.forEach(char => {
+             prompt += `- ${char.name}: ${char.description}`;
+             if (char.imageData) prompt += ` (Appearance based on image)`;
+             prompt += `\n`;
         });
          prompt += `\n`;
     }
@@ -699,73 +874,26 @@ function updateAvatarSkinTone(color) {
     });
 }
 
-function addCharacter() {
-    const characterName = document.getElementById('character-name').value.trim();
-    const characterRelation = document.getElementById('character-relation').value.trim();
-    
-    if (!characterName || !characterRelation) {
-        showErrorModal("Please enter both a name and relationship for the character.");
-        return;
-    }
-    
-    // Add to stored data
-    userResponses.additionalCharacters.push({
-        name: characterName,
-        relation: characterRelation
-    });
-    
-    // Add to visual list
-    const charactersList = document.getElementById('characters-list');
-    const emptyMessage = document.querySelector('.empty-char-list');
-    
-    if (emptyMessage) {
-        emptyMessage.remove();
-    }
-    
-    const charEntry = document.createElement('div');
-    charEntry.classList.add('character-entry');
-    charEntry.innerHTML = `
-        <div class="character-info">
-            <strong>${characterName}</strong>
-            <span>(${characterRelation})</span>
-        </div>
-        <button class="remove-char-btn" data-index="${userResponses.additionalCharacters.length - 1}">×</button>
-    `;
-    
-    // Add event listener to remove button
-    charEntry.querySelector('.remove-char-btn').addEventListener('click', function() {
-        const index = parseInt(this.getAttribute('data-index'));
-        userResponses.additionalCharacters.splice(index, 1);
-        charEntry.remove();
-        
-        // Re-index remaining buttons
-        document.querySelectorAll('.remove-char-btn').forEach((btn, i) => {
-            btn.setAttribute('data-index', i);
-        });
-        
-        // Show empty message if needed
-        if (userResponses.additionalCharacters.length === 0) {
-            charactersList.innerHTML = '<div class="empty-char-list">No additional characters added yet.</div>';
-        }
-    });
-    
-    charactersList.appendChild(charEntry);
-    
-    // Clear inputs
-    document.getElementById('character-name').value = '';
-    document.getElementById('character-relation').value = '';
-}
-
 // ---------- Error Handling ----------
 function showErrorModal(message) {
     const errorModal = document.getElementById('error-modal');
     const errorContent = document.getElementById('error-content');
+    const closeBtn = errorModal?.querySelector('.close-button'); // Get close button inside modal
     
     if (errorModal && errorContent) {
         errorContent.textContent = message;
         errorModal.style.display = 'flex';
+        // Add listener to close button *inside* the error modal if needed
+        // closeBtn?.addEventListener('click', closeErrorModal); 
     } else {
-        // Fallback to alert if modal not available
-        alert(message);
+        alert(message); // Fallback
+    }
+}
+
+// Add function to close error modal if not already present
+function closeErrorModal() {
+    const errorModal = document.getElementById('error-modal');
+    if (errorModal) {
+        errorModal.style.display = 'none';
     }
 } 

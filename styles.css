@@ -3953,6 +3953,7 @@ small a:hover {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    position: relative; /* Needed for absolute positioning of remove button */
 }
 
 .character-select-card:hover {
@@ -4044,6 +4045,33 @@ small a:hover {
 .add-new-char-card span {
     font-weight: 500;
 }
+
+.remove-char-btn-grid {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(255, 0, 0, 0.6); 
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    line-height: 18px; /* Adjust for vertical centering */
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 5; /* Ensure it's above image container */
+}
+
+.character-select-card:hover .remove-char-btn-grid {
+    opacity: 1; /* Show on hover */
+}
+
+.remove-char-btn-grid:hover {
+    background-color: rgba(255, 0, 0, 0.9);
+}
 /* End Step 6: Character Selection Grid */
 
 /* Enhanced Landing Page Styles */
@@ -4059,64 +4087,96 @@ small a:hover {
 
 .landing-hero {
     text-align: center;
-    max-width: 800px;
+    max-width: 750px; /* Slightly wider */
     margin: 0 auto;
-    padding: 2rem;
+    padding: 4rem 1rem; /* Adjusted padding */
     z-index: 2;
     position: relative;
 }
 
 #step-1-landing h1 {
-    font-size: 2.5rem;
+    font-size: 2.8rem; /* Slightly larger */
     font-weight: 700;
-    background: var(--hero-text-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 1.5rem;
+    /* Keep gradient */
+    margin-bottom: 1rem; /* Reduced margin */
     animation: fadeInUp 1.2s ease-out;
 }
 
 #step-1-landing .subtitle {
-    font-size: 1.2rem;
-    margin-bottom: 3rem;
+    font-size: 1.1rem; /* Slightly smaller */
+    margin-bottom: 2.5rem;
     color: var(--dark-gray);
     animation: fadeInUp 1.4s ease-out;
+    max-width: 600px; /* Limit width */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .welcome-features {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin-bottom: 3rem;
-    animation: fadeInUp 1.6s ease-out;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Slightly larger min */
+    gap: 1.5rem; /* Slightly smaller gap */
+    margin: 2.5rem 0;
 }
 
 .feature-card {
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 1.5rem;
-    border-radius: var(--modern-radius);
-    box-shadow: var(--minimalist-shadow);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: var(--transition-smooth);
-    flex: 1;
-    max-width: 220px;
+    background-color: var(--white);
+    padding: 2.5rem 1.8rem; /* Increased padding */
+    border-radius: 20px; /* Even more rounded */
+    text-align: center;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.04); /* Softer shadow */
+    border: 1px solid #ededed; /* Lighter border */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--accent-glow);
+    transform: translateY(-6px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07); /* Slightly more pronounced hover shadow */
+}
+
+/* Subtle Gradients */
+.feature-card-1 {
+    background: linear-gradient(145deg, #f5f7ff, #e8edff);
+}
+
+.feature-card-2 {
+    background: linear-gradient(145deg, #fffbeb, #fef3c7);
+}
+
+.feature-card-3 {
+    background: linear-gradient(145deg, #f3fef7, #e0fcf0);
 }
 
 .feature-card h3 {
+    /* color: var(--primary-color); Remove specific color, inherit */
+    color: #334155; /* Dark blue-gray */
+    font-size: 1.2rem; /* Adjusted size */
     font-weight: 600;
-    margin-bottom: 0.7rem;
-    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 0.6rem;
 }
 
 .feature-card p {
-    font-size: 0.9rem;
-    color: var(--dark-gray);
+    font-size: 0.9rem; /* Adjusted size */
+    color: #64748b; /* Softer gray */
+    line-height: 1.6;
+}
+
+#start-story-button {
+    background-color: var(--primary-color);
+    color: var(--white);
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 1rem; /* Ensure spacing */
+}
+
+#start-story-button:hover {
+    background-color: var(--primary-dark);
+    transform: scale(1.03);
 }
 
 /* Pulsing button */
@@ -4325,18 +4385,69 @@ small a:hover {
 }
 
 .cognitive-card .learn-more {
-  background-color: #f0f0f0;
-  color: #555;
-  border: 1px solid #ddd;
-  padding: 6px 12px;
-  border-radius: 6px;
+  background-color: transparent; /* Make background transparent */
+  color: var(--primary-color); /* Use primary color for text */
+  border: none; /* Remove border */
+  padding: 0; /* Remove padding */
+  border-bottom: 1px dashed var(--primary-color); /* Subtle indicator */
   font-size: 0.85em;
+  font-weight: 500; /* Make slightly bolder */
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: color 0.2s ease;
+  align-self: flex-start; /* Align to the left */
+  position: relative; /* Needed for tooltip */
+  display: inline-block; /* Fit content width */
 }
 
 .cognitive-card .learn-more:hover {
-  background-color: #e5e5e5;
+  color: var(--primary-dark); /* Darken on hover */
+  border-bottom-style: solid;
+}
+
+/* Tooltip Styling */
+.learn-more[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%; /* Position above the button + arrow */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333; 
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: normal; /* Allow wrapping */
+  width: 200px; /* Set a max width */
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 10;
+  pointer-events: none;
+  line-height: 1.4;
+}
+
+/* Arrow for the tooltip */
+.learn-more[data-tooltip]::before {
+  content: '';
+  position: absolute;
+  bottom: 100%; 
+  left: 50%;
+  transform: translateX(-50%); 
+  border: 5px solid transparent;
+  border-top-color: #333;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 11;
+  pointer-events: none;
+}
+
+/* Show tooltip on hover */
+.learn-more[data-tooltip]:hover::after,
+.learn-more[data-tooltip]:hover::before {
+  opacity: 1;
+  visibility: visible;
 }
 
 .cognitive-card.selected {
@@ -4649,3 +4760,162 @@ body:not(.on-step-1) .global-progress-container {
 /*    margin-top: 2rem; */
 /*    text-align: left; */
 /* } */
+
+/* Modal Base Styling */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    padding-top: 60px; /* Location of the box */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; 
+    padding: 30px;
+    border: 1px solid #888;
+    width: 80%; 
+    max-width: 550px;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Modal Close Button */
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Character Modal Specifics */
+.character-modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+#new-char-upload-section {
+    margin-top: 15px;
+}
+
+#new-char-preview-container {
+    margin-top: 10px;
+    width: 100px; /* Adjust as needed */
+    height: 100px;
+}
+
+#new-char-preview-image {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+}
+
+.modal-button-container {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.modal-button-container .cancel-button {
+    background-color: #eee;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+/* General Error Modal Styling */
+#error-modal .modal-content {
+     max-width: 400px;
+}
+
+#error-content {
+    margin-top: 15px;
+    font-size: 1.1em;
+    color: #d32f2f; /* Red color for errors */
+    text-align: center;
+}
+
+/* --- Consistent Workflow Buttons --- */
+
+.button-container {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem; /* Default spacing */
+    padding-top: 1.5rem; /* Add space above buttons */
+    border-top: 1px solid var(--light-gray); /* Separator line */
+}
+
+/* Base styles for both buttons */
+.back-button,
+.next-button {
+    padding: 0.8rem 1.8rem; /* Consistent padding */
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px; /* Consistent radius */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent; /* Base border */
+    min-width: 120px; /* Ensure minimum width */
+    text-align: center;
+}
+
+/* Specific styles for Next Button (using primary color) */
+.next-button {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+.next-button:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(106, 27, 154, 0.2);
+}
+
+/* Specific styles for Back Button (outlined style) */
+.back-button {
+    background-color: var(--white);
+    color: var(--text-secondary);
+    border: 1px solid var(--medium-gray);
+}
+
+.back-button:hover {
+    background-color: var(--lighter-gray);
+    border-color: var(--dark-gray);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Remove specific modern-button if desired, or keep for variations */
+/* .modern-button { ... } */
+
+/* Ensure button containers in specific steps have consistent spacing */
+#step-2-child-info .button-container,
+#step-3-avatar .button-container,
+#step-4-cognitive .button-container,
+#step-5-illustration .button-container, 
+#step-6-customize .button-container,
+#step-6b-confirmation .button-container {
+    margin-top: 2.5rem; /* Adjust as needed for visual balance */
+}
