@@ -25,7 +25,7 @@ let userResponses = {
 };
 
 let currentStepId = 'step-1-landing'; // Keep track of current step
-const totalWorkflowSteps = 9; // Define total number of steps (adjust if needed)
+const totalWorkflowSteps = 6; // Adjusted: Steps before login (0-6)
 
 // ---------- Initialization ----------
 document.addEventListener('DOMContentLoaded', () => {
@@ -108,19 +108,28 @@ function updateProgressBar(stepId) {
         'step-2-child-info': 1,
         'step-3-avatar': 2,
         'step-4-cognitive': 3,
-        'step-5-illustration': 4, // Assuming theme is removed/combined
+        'step-5-illustration': 4, // Changed step 5 to illustration
         'step-6-customize': 5,
-        'step-6b-confirmation': 6, 
-        'step-7-login': 7, 
-        'step-8-preview': 8,
-        'step-9-purchase': 9
-        // Omitting step 10 (library) as it's outside the creation flow
+        'step-6b-confirmation': 6 
+        // Removed login and subsequent steps from progress tracking
+        // 'step-7-login': 7, 
+        // 'step-8-preview': 8,
+        // 'step-9-purchase': 9
     };
 
-    const currentStepNumber = stepOrder[stepId] || 0;
-    const progressPercentage = (currentStepNumber / totalWorkflowSteps) * 100;
-
-    progressBar.style.width = `${progressPercentage}%`;
+    const currentStepNumber = stepOrder[stepId];
+    // Only update progress if the step is part of the main workflow
+    if (currentStepNumber !== undefined) {
+        const progressPercentage = (currentStepNumber / totalWorkflowSteps) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
+    } else {
+        // If step not in order (e.g., login, preview), potentially hide or reset?
+        // For now, just don't update it further.
+         // If moving *to* login or later, ensure it's 100%
+        if (stepOrder[currentStepId] === totalWorkflowSteps) { 
+             progressBar.style.width = `100%`;
+        }
+    }
 
     // Toggle body class for initial visibility
     if (stepId === 'step-1-landing') {
@@ -517,18 +526,16 @@ function populateConfirmationDetails() {
 
     // --- Custom Prompt --- 
     // We will now generate and display the structured prompt
-    // setText('confirm-custom-prompt', userResponses.customPrompt || 'None'); // Keep this for raw input if needed elsewhere
-    const structuredPrompt = generateStructuredPrompt();
+    setText('confirm-custom-prompt', userResponses.customPrompt || 'None'); // Need an element with id="confirm-custom-prompt"
+
+    // --- Generate and Display Structured Prompt ---
+    const structuredPromptText = generateStructuredPrompt();
     const promptBox = document.getElementById('structured-prompt');
-    const promptEditArea = document.getElementById('prompt-edit-textarea');
     if (promptBox) {
-        promptBox.textContent = structuredPrompt;
+        promptBox.textContent = structuredPromptText; // Use textContent to preserve formatting like newlines
+    } else {
+        console.warn("Element with ID structured-prompt not found.");
     }
-    if (promptEditArea) {
-        promptEditArea.value = structuredPrompt; // Pre-fill textarea
-    }
-    // Clear the old separate custom prompt display if it exists
-    setText('confirm-custom-prompt', '-'); 
 
     // --- Display Avatar Preview? (More complex) ---
     // Could potentially display the selected skin tone or base avatar index
@@ -537,62 +544,100 @@ function populateConfirmationDetails() {
 
 // ---------- Generate Structured Prompt ----------
 function generateStructuredPrompt() {
-    let prompt = `Generate a children's story with the following characteristics:\n\n`;
+    console.log("Generating structured prompt from:", userResponses);
+    let prompt = `Generate a personalized, engaging children's story suitable for a ${userResponses.childInfo.age}-year-old child. \n\n`;
 
-    // Child Info
-    prompt += `**Child:**\n`;
-    prompt += `  - Name: ${userResponses.childInfo.name || 'The Child'}\n`;
-    prompt += `  - Age: ${userResponses.childInfo.age || 'Unknown'}\n`;
-    prompt += `  - Gender: ${userResponses.childInfo.gender || 'Unknown'}\n`;
-    if (userResponses.childInfo.interests.length > 0) {
-        prompt += `  - Interests: ${userResponses.childInfo.interests.join(', ')}\n`;
-    }
-    prompt += `\n`;
-
-    // Avatar/Character Info
-    prompt += `**Main Character Appearance:**\n`;
-    if (userResponses.avatar.source === 'upload') {
-        prompt += `  - Based on uploaded image.\n`;
-    } else {
-        prompt += `  - Preset Avatar Index: ${userResponses.avatar.base}\n`;
-        prompt += `  - Skin Tone: ${userResponses.avatar.skinTone || 'Default'}\n`;
-    }
+    // Main Character
+    prompt += `**Main Character:**\n`;
+    prompt += `- Name: ${userResponses.childInfo.name || 'The Child'}\n`;
+    prompt += `- Age: ${userResponses.childInfo.age}\n`;
+    prompt += `- Gender: ${userResponses.childInfo.gender}\n`;
     if (userResponses.avatar.customization) {
-        prompt += `  - Custom details: ${userResponses.avatar.customization}\n`;
+        prompt += `- Appearance Notes: ${userResponses.avatar.customization}\n`;
     }
     prompt += `\n`;
-    
-    if (userResponses.storyCharacters.length > 1) {
-         prompt += `**Other Characters:**\n`;
-         userResponses.storyCharacters.forEach(char => {
-             if (char.id !== 'main-avatar') { // Don't list main avatar again
-                 prompt += `  - ${char.name} (${char.type || 'Character'})\n`;
-             }
-         });
+
+    // Other Characters
+    if (userResponses.storyCharacters && userResponses.storyCharacters.length > 1) {
+        prompt += `**Other Characters Included:**\n`;
+        userResponses.storyCharacters.forEach(char => {
+            // Avoid duplicating the main character info if they are in the list separately
+            if (char.id !== 'main-avatar') { 
+                prompt += `- ${char.name} (${char.type || 'Character'})\n`;
+            }
+        });
+        prompt += `\n`;
+    } else if (userResponses.additionalCharacters && userResponses.additionalCharacters.length > 0) {
+        // Fallback to additionalCharacters if storyCharacters only has the main avatar
+        prompt += `**Other Characters Included:**\n`;
+        userResponses.additionalCharacters.forEach(char => {
+             prompt += `- ${char.name} (${char.relation || 'Character'})\n`;
+        });
          prompt += `\n`;
     }
 
-    // Story Elements
-    prompt += `**Story Elements:**\n`;
-    if (userResponses.cognitiveAreas.length > 0) {
-        prompt += `  - Cognitive Focus: ${userResponses.cognitiveAreas.join(', ').replace(/-/g, ' ')}\n`;
+    // Interests
+    if (userResponses.childInfo.interests && userResponses.childInfo.interests.length > 0) {
+        prompt += `**Incorporate Child's Interests:**\n`;
+        prompt += `- Themes or elements related to: ${userResponses.childInfo.interests.join(', ')}\n`;
+        prompt += `\n`;
     }
-    if (userResponses.storyStyle) {
-        prompt += `  - Illustration Style: ${userResponses.storyStyle.replace(/-/g, ' ')}\n`;
+
+    // Cognitive Focus - Make this detailed
+    prompt += `**Cognitive Development Focus (Integrate Naturally):**\n`;
+    if (userResponses.cognitiveAreas && userResponses.cognitiveAreas.length > 0) {
+        userResponses.cognitiveAreas.forEach(area => {
+            prompt += `- ${area.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: `; // Capitalize words
+            switch (area) {
+                case 'executive-function':
+                    prompt += `Include scenarios requiring planning, organization, or task initiation. Maybe ${userResponses.childInfo.name} needs to plan a small event or organize toys before playing.`;
+                    break;
+                case 'attention-focus':
+                    prompt += `Create moments where sustained attention is needed or distractions must be ignored. Perhaps ${userResponses.childInfo.name} needs to focus on finding something specific or listening carefully to instructions.`;
+                    break;
+                case 'memory':
+                    prompt += `Weave in details early in the story that ${userResponses.childInfo.name} needs to recall later. This could be remembering a path, a sequence of events, or where an item was placed.`;
+                    break;
+                case 'language': // Updated name from HTML
+                    prompt += `Use rich vocabulary and descriptive language suitable for the age. Encourage communication between characters. Perhaps include a simple rhyme or song.`;
+                    break;
+                case 'problem-solving': // Updated name from HTML
+                    prompt += `Introduce a simple problem or challenge that the characters need to think through and solve together using logic or creativity.`;
+                    break;
+                case 'conceptual':
+                    prompt += `Introduce basic concepts like shapes, colors, numbers, or simple cause-and-effect relationships within the narrative.`;
+                    break;
+                 case 'emotional-regulation': // Example if added later
+                     prompt += `Present situations where ${userResponses.childInfo.name} experiences mild frustration or excitement and learns simple coping strategies or ways to express feelings appropriately.`;
+                     break;
+                 case 'social-skills': // Example if added later
+                     prompt += `Include interactions that model sharing, taking turns, empathy, or understanding others' perspectives.`;
+                     break;
+                default:
+                    prompt += `Focus on this cognitive area throughout the story.`;
+            }
+            prompt += `\n`;
+        });
+    } else {
+        prompt += `- General cognitive engagement suitable for the age group.\n`;
     }
-    // Add theme, reading level, length, type later if they exist
-    // prompt += `  - Theme: ${userResponses.storyTheme || 'General'}\n`;
-    // prompt += `  - Reading Level: ${userResponses.readingLevel || 'Intermediate'}\n`;
     prompt += `\n`;
 
-    // Custom Notes/Prompt
-    const customNotes = document.getElementById('custom-prompt')?.value.trim(); // Get latest value from step 6 textarea
-    if (customNotes) {
-        prompt += `**Additional Notes/Requests:**\n${customNotes}\n`;
-    } else if (userResponses.customPrompt) {
-         // Use value saved if navigating back and forth
-         prompt += `**Additional Notes/Requests:**\n${userResponses.customPrompt}\n`;
+    // Illustration Style
+    if (userResponses.storyStyle) {
+        prompt += `**Visual Style:**\n`;
+        prompt += `- The story should be suitable for illustration in a **${userResponses.storyStyle.replace(/-/g, ' ')}** style. Evoke the appropriate mood (e.g., whimsical, vibrant, detailed).\n`;
+        prompt += `\n`;
     }
+
+    // Custom Prompt / Notes
+    if (userResponses.customPrompt) {
+        prompt += `**Additional User Notes:**\n`;
+        prompt += `- Please incorporate the following: ${userResponses.customPrompt}\n`;
+        prompt += `\n`;
+    }
+    
+    prompt += `**Tone:** Make the story positive, age-appropriate, and engaging, ending on a satisfying note. Avoid complex sentences or overly abstract ideas unless directly related to the 'conceptual' cognitive goal.`
 
     return prompt;
 }

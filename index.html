@@ -15,21 +15,21 @@
             <div class="sidebar-section">DISCOVER</div>
             <div class="sidebar-menu">
                 <div class="menu-item active" data-step="step-10-library" data-tab="library-tab">
-                    <object type="image/svg+xml" data="icons/home.svg" class="menu-icon"></object>
+                    <object type="image/svg+xml" data="assets/icons/home.svg" class="menu-icon"></object>
                     <span>Home</span>
                 </div>
                 <div class="menu-item" data-step="step-1-landing">
-                    <object type="image/svg+xml" data="icons/search.svg" class="menu-icon"></object>
+                    <object type="image/svg+xml" data="assets/icons/search.svg" class="menu-icon"></object>
                     <span>Library</span>
                 </div>
                 <div class="menu-item" data-step="step-10-library" data-tab="dashboard-tab">
-                    <object type="image/svg+xml" data="icons/dashboard.svg" class="menu-icon"></object>
+                    <object type="image/svg+xml" data="assets/icons/dashboard.svg" class="menu-icon"></object>
                     <span>Dashboard</span>
                 </div>
             </div>
             <div class="profile-area">
                 <div class="menu-item" data-step="step-7-login">
-                    <object type="image/svg+xml" data="icons/profile.svg" class="menu-icon"></object>
+                    <object type="image/svg+xml" data="assets/icons/profile.svg" class="menu-icon"></object>
                     <span>Profile / Login</span>
                 </div>
             </div>
@@ -490,7 +490,7 @@
             
             <!-- Step 7: Account Creation / Login -->
             <div id="step-7-login" class="content-panel workflow-step login-page-container">
-                <!-- New Login/Signup Design -->
+                <!-- Centered Login Form -->
                 <div class="login-form-minimal">
                     <h1>Create an account</h1>
                     <p class="subtitle">Enter your email to sign up for this app</p>
@@ -499,11 +499,11 @@
                         <input type="email" id="signup-email" placeholder="email@domain.com" class="text-input" aria-label="Email address">
                     </div>
                     
-                    <button id="signup-email-button" class="login-btn primary full-width">Sign up with email</button>
+                    <button id="signup-email-button" class="login-btn primary full-width" onclick="navigateToStep('step-8-preview')">Sign up with email</button> 
                     
                     <div class="login-divider"><span>or continue with</span></div>
                     
-                    <button id="google-signin-button" class="login-btn social-btn google-btn full-width">
+                    <button id="google-signin-button" class="login-btn social-btn google-btn full-width" onclick="navigateToStep('step-8-preview')">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" class="social-icon"> 
                         Google
                     </button>
@@ -515,21 +515,20 @@
                     </div>
                     
                     <!-- Demo Account Button (Optional) -->
-                     <button id="dev-pass-button-minimal" class="link-button dev-pass-link">Continue with Demo Account</button>
+                    <button id="dev-pass-button-minimal" class="link-button dev-pass-link" onclick="navigateToStep('step-8-preview')">Continue with Demo Account</button>
                 </div>
-                <!-- End New Login/Signup Design -->
+                <!-- End Centered Login Form -->
                 
-                <!-- Add a button container for Back button if needed in workflow -->
-                <div class="button-container">
+                 <!-- Button Container for Back -->
+                 <div class="button-container login-back-button-container" style="position: absolute; bottom: 20px; left: 20px;"> 
                      <button class="back-button" onclick="navigateToStep('step-6b-confirmation')">Back</button>
-                     <!-- No Next button here, handled by signup/login actions -->
                  </div>
             </div>
             
             <!-- Step 8: Preview the Book -->
-            <div id="step-8-preview" class="content-panel workflow-step">
+            <div id="step-8-preview" class="content-panel workflow-step preview-page-container"> 
                 <h1>Preview Your Book</h1>
-                <p class="subtitle">Here's a sneak peek of your story (4-5 pages).</p>
+                <p class="subtitle">Here's a sneak peek of your generated story.</p>
                 
                 <div id="book-preview-area">
                     <!-- Preview content will be injected here by JS -->
@@ -545,42 +544,12 @@
             </div>
         </div>
 
-                <div class="button-container"> <!-- Button Container -->
+                <div class="button-container preview-button-container">
                     <button class="back-button" onclick="navigateToStep('step-7-login')">Back</button> 
-                    <button class="next-button" onclick="navigateToStep('step-9-purchase')">Looks Good! Proceed</button>
+                    <button class="next-button save-library-button" onclick="navigateToStep('step-10-library')">Save to Library</button> 
                 </div>
             </div>
             
-            <!-- Step 9: Purchase Options -->
-            <div id="step-9-purchase" class="content-panel workflow-step">
-                <h1>Unlock Your Full Story</h1>
-                <p class="subtitle">Choose an option to access the complete book.</p>
-                
-                <div class="purchase-options-container">
-                    <div class="purchase-option">
-                        <h3>One-Time Purchase</h3>
-                        <p class="price">$9.99</p>
-                        <p class="description">Get lifetime access to this generated book.</p>
-                        <button id="purchase-one-time-btn" class="purchase-btn primary">
-                            <i class="fa-solid fa-book"></i> Purchase This Book
-                        </button>
-                    </div>
-                    <div class="purchase-option">
-                        <h3>Subscription</h3>
-                        <p class="price">$X.XX / month</p> <!-- Placeholder price -->
-                        <p class="description">Unlimited access to all generated books & new stories.</p>
-                        <button id="purchase-subscription-btn" class="purchase-btn secondary">
-                             <i class="fa-solid fa-infinity"></i> Subscribe Now
-                        </button>
-                            </div>
-                            </div>
-                            
-                <div class="button-container"> <!-- Button Container -->
-                    <button class="back-button" onclick="navigateToStep('step-8-preview')">Back to Preview</button>
-                    <!-- Removed direct Complete Purchase button -->
-                            </div>
-                        </div>
-                        
             <!-- Step 10: Accessing the Library/Home -->
             <div id="step-10-library" class="content-panel workflow-step">
                 <div class="library-header">

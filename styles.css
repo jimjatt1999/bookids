@@ -4587,3 +4587,65 @@ body:not(.on-step-1) .global-progress-container {
 }
 
 /* End Avatar Upload Styling */
+
+/* Step 7: Two-Column Login/Preview Layout (REMOVED) */
+
+/* Step 8: Preview Page Container Styling */
+.preview-page-container {
+    max-width: 900px; /* Limit width */
+    margin: 40px auto; /* Center with margin */
+    padding: 30px; /* Internal padding */
+}
+
+#book-preview-area {
+    min-height: 400px; /* Taller preview area */
+    border: 1px solid var(--medium-gray);
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    padding: 1.5rem; /* More padding inside preview */
+    background-color: var(--secondary-color);
+}
+
+.preview-button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.save-library-button {
+    /* Use existing .next-button styles or add specifics */
+    background-color: #10b981; /* Example: Green color */
+}
+
+.save-library-button:hover {
+    background-color: #059669; /* Darker green */
+}
+
+/* Remove Two-Column Layout Styles */
+.two-column-layout,
+.login-form-column,
+.login-preview-column,
+.login-book-preview,
+.preview-image-container,
+.preview-nav-controls,
+.login-back-button-container { 
+    /* These might need more specific removal or adjustment 
+       depending on other usages, but this clears the main layout */
+    display: revert; 
+    flex: revert;
+    padding: revert;
+    margin: revert;
+    position: revert;
+    bottom: revert;
+    left: revert;
+    max-width: revert;
+    gap: revert;
+}
+
+/* Adjust login back button if absolute positioning was removed */
+/* #step-7-login > .button-container { */
+/*    position: static; */
+/*    margin-top: 2rem; */
+/*    text-align: left; */
+/* } */
