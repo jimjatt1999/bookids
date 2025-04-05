@@ -12,55 +12,76 @@
     <div class="container">
         <div class="sidebar">
             <div class="logo">Bookids.</div>
-            <div class="sidebar-section">Discover</div>
+            <div class="sidebar-section">DISCOVER</div>
             <div class="sidebar-menu">
-                <div class="menu-item active" onclick="showMainPage()">
-                    <img src="icons/home.svg" alt="Home" class="menu-icon">
+                <div class="menu-item active" data-step="step-10-library" data-tab="library-tab">
+                    <object type="image/svg+xml" data="icons/home.svg" class="menu-icon"></object>
                     <span>Home</span>
                 </div>
-                <div class="menu-item" onclick="showLibrary()">
-                    <img src="icons/search.svg" alt="Library" class="menu-icon">
+                <div class="menu-item" data-step="step-1-landing">
+                    <object type="image/svg+xml" data="icons/search.svg" class="menu-icon"></object>
                     <span>Library</span>
                 </div>
-                <div class="menu-item" onclick="showDashboard()">
-                    <img src="icons/dashboard.svg" alt="Dashboard" class="menu-icon">
+                <div class="menu-item" data-step="step-10-library" data-tab="dashboard-tab">
+                    <object type="image/svg+xml" data="icons/dashboard.svg" class="menu-icon"></object>
                     <span>Dashboard</span>
                 </div>
             </div>
             <div class="profile-area">
-                <div class="menu-item">
-                    <img src="icons/profile.svg" alt="Profile" class="menu-icon">
-                    <span>Profile</span>
+                <div class="menu-item" data-step="step-7-login">
+                    <object type="image/svg+xml" data="icons/profile.svg" class="menu-icon"></object>
+                    <span>Profile / Login</span>
                 </div>
             </div>
         </div>
         <div class="main-content">
-            <!-- Basic Info Form (Page 1) -->
-            <div id="basic-info-form" class="content-panel">
-                <div class="back-button" style="visibility: hidden;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M19 12H5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 19L5 12L12 5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h1>Create a unique story for your kid!</h1>
-                <p class="subtitle">Let's start with some basic information</p>
-                
-                <div class="progress-bar">
-                    <div class="progress-indicator" style="width: 25%;"></div>
-                </div>
-                
-                <div class="form-section">
-                    <div class="form-group">
-                        <label for="openai-key">OpenAI API Key</label>
-                        <input type="password" id="openai-key" placeholder="sk-..." class="text-input">
-                        <small>
-                            Enter your OpenAI API key (starts with "sk-"). 
-                            <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">Get your API key here</a>. 
-                            Your key is never stored and only used to generate your story.
-                        </small>
+            
+            <!-- Global Progress Bar -->
+            <div id="global-progress-bar-container" class="global-progress-container">
+                <div id="global-progress-bar" class="global-progress-bar"></div>
+            </div>
+
+            <!-- Step 1: Welcome/Landing Page -->
+            <div id="step-1-landing" class="content-panel workflow-step active">
+                <div class="landing-hero">
+                    <h1>Let's help you generate your child's first story</h1>
+                    <p class="subtitle">Answer a few simple questions to create a unique, personalized storybook.</p>
+                    
+                    <div class="welcome-features">
+                        <div class="feature-card">
+                            <div class="feature-icon feature-icon-personalize"></div>
+                            <h3>Personalized Characters</h3>
+                            <p>Create avatars for your child and family members.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon feature-icon-brain"></div>
+                            <h3>Cognitive Boost</h3>
+                            <p>Focus stories on areas like memory, focus, or problem-solving.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon feature-icon-art"></div>
+                            <h3>Beautiful Illustrations</h3>
+                            <p>Choose from various art styles to bring the story to life.</p>
+                        </div>
                     </div>
                     
+                    <button id="start-story-button" class="next-button pulsing-button">Start Your Story</button>
+                </div>
+
+                <div class="animated-background">
+                    <div class="pulse-circle"></div>
+                    <div class="pulse-circle delay-1"></div>
+                    <div class="pulse-circle delay-2"></div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Child Information Input -->
+            <div id="step-2-child-info" class="content-panel workflow-step">
+                <h1>Tell us about your child</h1>
+                <p class="subtitle">This helps personalize the story and avatar.</p>
+                
+                <!-- Moved from #basic-info-form -->
+                <div class="form-section">
                     <div class="form-group">
                         <label for="child-name">Child's Name</label>
                         <input type="text" id="child-name" placeholder="e.g., Alexander" class="text-input">
@@ -74,52 +95,16 @@
                         </div>
                     </div>
                     
-                    <div class="form-group">
+                            <div class="form-group">
                         <label>Age</label>
                         <div class="slider-container">
                             <input type="range" min="3" max="10" value="5" class="slider" id="age-slider">
                             <div class="slider-value">5</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <button class="next-button" onclick="showStoryDetailsForm()">
-                    Next
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 5L19 12L12 19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
-            </div>
-            
-            <!-- Story Details Form (Page 2) -->
-            <div id="story-details-form" class="content-panel" style="display: none;">
-                <div class="back-button" onclick="showBasicInfoForm()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M19 12H5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 19L5 12L12 5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h1>Story details</h1>
-                <p class="subtitle">Customize your story settings</p>
-                
-                <div class="progress-bar">
-                    <div class="progress-indicator" style="width: 50%;"></div>
-                </div>
-                
-                <div class="form-section">
-                    <div class="form-group">
-                        <label>Story Length</label>
-                        <div class="toggle-group">
-                            <div class="length-option active" data-length="short">Short</div>
-                            <div class="length-option" data-length="medium">Medium</div>
-                            <div class="length-option" data-length="long">Long</div>
-                        </div>
-                        <small>Short (~200 words), Medium (~400 words), Long (~600 words)</small>
-                    </div>
+                            </div>
+                            </div>
                     
-                    <div class="form-group">
-                        <label>Interests (Choose up to 3)</label>
+                            <div class="form-group">
+                        <label>Interests (Optional, Choose up to 3)</label>
                         <div class="interests-grid">
                             <div class="interest-option">Animals</div>
                             <div class="interest-option">Space</div>
@@ -129,334 +114,717 @@
                             <div class="interest-option">Music</div>
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>Additional Characters</label>
-                        <div id="characters-container">
-                            <!-- Characters will be added here dynamically -->
-                        </div>
-                        <button type="button" id="add-character-btn" class="add-character-btn">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Add a character
-                        </button>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="custom-prompt">Custom Story Elements (Optional)</label>
-                        <textarea id="custom-prompt" placeholder="Add specific themes, settings, or story elements you'd like to include..." class="text-input custom-prompt" rows="3"></textarea>
-                        <small>For example: "Set in a space station" or "Include a magical talking cat"</small>
-                    </div>
                 </div>
-                
-                <button class="next-button" onclick="showCognitiveAreas()">
-                    Next
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 5L19 12L12 19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
+                <!-- End Moved Content -->
+
+                <div class="button-container"> <!-- Button Container -->
+                    <button class="back-button" onclick="navigateToStep('step-1-landing')">Back</button>
+                    <button class="next-button" onclick="navigateToStep('step-3-avatar')">Next</button>
+                </div>
             </div>
             
-            <div id="cognitive-areas" class="content-panel" style="display: none;">
-                <div class="back-button" onclick="showStoryDetailsForm()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M19 12H5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 19L5 12L12 5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h1>Cognitive areas to develop in your story</h1>
-                <p class="subtitle">We suggest you to pick up max. 2 for story</p>
+            <!-- Step 3: Avatar Creation -->
+            <div id="step-3-avatar" class="content-panel workflow-step">
+                <h1>Create an Avatar</h1>
+                <p class="subtitle">Choose a look for the main character.</p>
                 
-                <div class="progress-bar">
-                    <div class="progress-indicator" style="width: 66%;"></div>
+                <div class="avatar-creation-container">
+                    <!-- Upload/Select Toggle -->
+                    <div class="form-group avatar-source-toggle">
+                        <label>Avatar Source:</label>
+                        <div class="toggle-group">
+                            <div class="toggle-option active" data-source="select">Select Preset</div>
+                            <div class="toggle-option" data-source="upload">Upload Image</div>
+                        </div>
+                    </div>
+
+                    <!-- Selection Section (Initially Visible) -->
+                    <div id="avatar-select-section">
+                        <div class="form-section">
+                            <label>Select Base Avatar</label>
+                            <div class="avatar-selection-grid">
+                                <!-- SVG Avatars that can change with gender/skin tone -->
+                                <div class="avatar-option selected" data-avatar-index="0">
+                                    <svg class="avatar-svg" width="100" height="100" viewBox="0 0 100 100">
+                                        <circle class="avatar-face" cx="50" cy="50" r="40" fill="#e2b38f"/>
+                                        <circle cx="35" cy="40" r="5" fill="#000"/>
+                                        <circle cx="65" cy="40" r="5" fill="#000"/>
+                                        <path class="avatar-smile" d="M 30 60 Q 50 80 70 60" fill="none" stroke="#000" stroke-width="3"/>
+                                        <path class="avatar-hair boy-hair" d="M 20 30 Q 50 10 80 30 L 80 40 Q 50 20 20 40 Z" fill="#7A4A31"/>
+                                        <path class="avatar-hair girl-hair" d="M 20 30 Q 50 10 80 30 L 80 60 Q 65 50 80 70 L 60 80 Q 50 70 40 80 L 20 70 Q 35 60 20 50 Z" fill="#7A4A31" style="display: none;"/>
+                                    </svg>
+                                </div>
+                                <div class="avatar-option" data-avatar-index="1">
+                                    <svg class="avatar-svg" width="100" height="100" viewBox="0 0 100 100">
+                                        <circle class="avatar-face" cx="50" cy="50" r="40" fill="#e2b38f"/>
+                                        <circle cx="35" cy="40" r="5" fill="#000"/>
+                                        <circle cx="65" cy="40" r="5" fill="#000"/>
+                                        <path class="avatar-smile" d="M 35 60 Q 50 70 65 60" fill="none" stroke="#000" stroke-width="3"/>
+                                        <path class="avatar-hair boy-hair" d="M 25 25 L 35 15 L 65 15 L 75 25 L 75 35 L 25 35 Z" fill="#333"/>
+                                        <path class="avatar-hair girl-hair" d="M 20 30 C 20 20 80 20 80 30 L 80 55 C 70 45 85 60 75 70 C 65 75 35 75 25 70 C 15 60 30 45 20 55 Z" fill="#333" style="display: none;"/>
+                                    </svg>
+                                </div>
+                                <div class="avatar-option" data-avatar-index="2">
+                                    <svg class="avatar-svg" width="100" height="100" viewBox="0 0 100 100">
+                                        <circle class="avatar-face" cx="50" cy="50" r="40" fill="#e2b38f"/>
+                                        <circle cx="35" cy="40" r="5" fill="#000"/>
+                                        <circle cx="65" cy="40" r="5" fill="#000"/>
+                                        <path class="avatar-smile" d="M 30 65 Q 50 75 70 65" fill="none" stroke="#000" stroke-width="3"/>
+                                        <path class="avatar-hair boy-hair" d="M 30 20 Q 50 10 70 20 Q 80 30 70 40 Q 50 30 30 40 Q 20 30 30 20 Z" fill="#D4A76A"/>
+                                        <path class="avatar-hair girl-hair" d="M 30 20 Q 50 10 70 20 Q 85 35 70 50 L 75 65 Q 60 55 50 65 Q 40 55 25 65 L 30 50 Q 15 35 30 20 Z" fill="#D4A76A" style="display: none;"/>
+                                    </svg>
+                                </div>
+                                <div class="avatar-option" data-avatar-index="3">
+                                    <svg class="avatar-svg" width="100" height="100" viewBox="0 0 100 100">
+                                        <circle class="avatar-face" cx="50" cy="50" r="40" fill="#e2b38f"/>
+                                        <circle cx="35" cy="40" r="5" fill="#000"/>
+                                        <circle cx="65" cy="40" r="5" fill="#000"/>
+                                        <path class="avatar-smile" d="M 30 60 Q 50 70 70 60" fill="none" stroke="#000" stroke-width="3"/>
+                                        <rect class="avatar-hair boy-hair" x="25" y="10" width="50" height="25" rx="5" fill="#5C3817"/>
+                                        <path class="avatar-hair girl-hair" d="M 20 20 Q 50 0 80 20 L 85 50 Q 70 40 75 70 Q 50 80 25 70 Q 30 40 15 50 Z" fill="#5C3817" style="display: none;"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <label>Select Skin Tone</label>
+                            <div class="skin-tone-selector">
+                                <!-- Placeholder: Skin tone swatches -->
+                                <div class="skin-tone-swatch" data-color="#f3d3b8" style="background-color: #f3d3b8;"></div>
+                                <div class="skin-tone-swatch selected" data-color="#e2b38f" style="background-color: #e2b38f;"></div>
+                                <div class="skin-tone-swatch" data-color="#c78d6c" style="background-color: #c78d6c;"></div>
+                                <div class="skin-tone-swatch" data-color="#a16849" style="background-color: #a16849;"></div>
+                                <div class="skin-tone-swatch" data-color="#7a4a31" style="background-color: #7a4a31;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload Section (Initially Hidden) -->
+                    <div id="avatar-upload-section" style="display: none;">
+                        <div class="form-section">
+                            <label for="avatar-upload-input">Upload Avatar Image</label>
+                            <input type="file" id="avatar-upload-input" accept="image/png, image/jpeg, image/webp" class="file-input">
+                            <div id="avatar-upload-preview" class="upload-preview-container">
+                                <img id="avatar-preview-image" src="#" alt="Avatar Preview" style="display: none;">
+                                <span id="avatar-preview-placeholder">No image selected</span>
+                            </div>
+                            <small>Upload a PNG, JPG, or WEBP file (Max 2MB).</small>
+                        </div>
+                    </div>
+
+                    <!-- Customization (Common) -->
+                    <div class="form-section">
+                        <label for="avatar-customization">Customization Details (Optional)</label>
+                        <input type="text" id="avatar-customization" placeholder="e.g., blue curly hair, freckles, glasses" class="text-input">
+                        <small>Describe specific features you'd like the avatar to have.</small>
+                    </div>
+                </div>
+
+                <div class="button-container"> <!-- Button Container -->
+                    <button class="back-button" onclick="navigateToStep('step-2-child-info')">Back</button>
+                    <button class="next-button" onclick="navigateToStep('step-4-cognitive')">Next</button>
+                </div>
+            </div>
+            
+            <!-- Step 4: Select Cognitive Focus -->
+            <div id="step-4-cognitive" class="content-panel workflow-step">
+                <h1>Cognitive areas to develop in your next book</h1>
+                <p class="subtitle">We suggest you to pick up max. 2 for book</p>
+                <div class="progress-indicator-container"> 
+                    <!-- Placeholder for progress bar - styling in CSS -->
+                    <div class="progress-bar"></div> 
                 </div>
                 
                 <div class="cognitive-grid">
                     <div class="cognitive-card" data-area="executive-function">
-                        <h3>Executive Function</h3>
-                        <p>Foundational "air traffic control" skills of the brain.</p>
-                        <button class="learn-more">Learn more</button>
+                        <div class="card-content">
+                            <h3>Executive Function</h3>
+                            <p>Foundational "air traffic control" skills of the brain.</p>
+                            <button class="learn-more">Learn more</button>
+                        </div>
                     </div>
                     
                     <div class="cognitive-card" data-area="attention-focus">
-                        <h3>Attention and Focus</h3>
-                        <p>The ability to concentrate, sustain attention, and selectively attend stimuli.</p>
-                        <button class="learn-more">Learn more</button>
+                        <div class="card-content">
+                            <h3>Attention and Focus</h3>
+                            <p>The ability to concentrate, sustain attention, and selectively attend stimuli.</p>
+                            <button class="learn-more">Learn more</button>
+                        </div>
                     </div>
                     
                     <div class="cognitive-card" data-area="memory">
-                        <h3>Memory</h3>
-                        <p>Involves encoding, storing, and retrieving information.</p>
-                        <button class="learn-more">Learn more</button>
-                    </div>
+                        <div class="card-content">
+                            <h3>Memory</h3>
+                            <p>Involves encoding, storing, and retrieving information.</p>
+                            <button class="learn-more">Learn more</button>
+                        </div>
+                     </div>
                     
                     <div class="cognitive-card" data-area="language">
-                        <h3>Language and communication</h3>
-                        <p>Central to thought, learning and social development.</p>
-                        <button class="learn-more">Learn more</button>
+                        <div class="card-content">
+                            <h3>Language and communication</h3>
+                            <p>Central to thought, learning and social development.</p>
+                            <button class="learn-more">Learn more</button>
+                        </div>
                     </div>
                     
                     <div class="cognitive-card" data-area="problem-solving">
-                        <h3>Reasoning and Problem Solving</h3>
-                        <p>The ability to make sense of information and apply logic.</p>
-                        <button class="learn-more">Learn more</button>
-                    </div>
+                        <div class="card-content">
+                            <h3>Reasoning and Problem Solving</h3>
+                            <p>The ability to make sense of information and apply logic.</p>
+                            <button class="learn-more">Learn more</button>
+                        </div>
+                     </div>
                     
                     <div class="cognitive-card" data-area="conceptual">
-                        <h3>Conceptual Understanding</h3>
-                        <p>Forming mental representations and categories.</p>
-                        <button class="learn-more">Learn more</button>
+                        <div class="card-content">
+                            <h3>Conceptual Understanding</h3>
+                            <p>Forming mental representations and categories.</p>
+                            <button class="learn-more">Learn more</button>
+                        </div>
                     </div>
                 </div>
-                
-                <button class="next-button" onclick="showArtStyles()">
-                    Next
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 5L19 12L12 19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
+
+                <div class="button-container"> <!-- Button Container -->
+                    <button class="back-button" onclick="navigateToStep('step-3-avatar')">Back</button>
+                    <button class="next-button modern-button" onclick="navigateToStep('step-5-illustration')">Next →</button>
+                </div>
             </div>
             
-            <div id="art-styles" class="content-panel" style="display: none;">
-                <div class="back-button" onclick="showCognitiveAreas()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M19 12H5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 19L5 12L12 5" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h1>Choose an art style for your story</h1>
-                <p class="subtitle">We'll use this to generate the illustrations</p>
-                
-                <div class="progress-bar">
-                    <div class="progress-indicator" style="width: 100%;"></div>
-                </div>
-                
+            <!-- Step 5: Illustration Style Selection -->
+            <div id="step-5-illustration" class="content-panel workflow-step">
+                <h1>Choose an Illustration Style</h1>
+                <p class="subtitle">Select the visual style for the book.</p>
+
+                <!-- Moved from #art-styles -->
                 <div class="art-style-grid">
                     <div class="art-style-card" data-style="watercolor">
-                        <div class="art-preview watercolor"></div>
+                        <div class="art-preview">
+                            <img src="assets/images/styles/watercolour.png" alt="Watercolor Illustration" class="style-image">
+                        </div>
                         <p>Watercolor Illustration</p>
                     </div>
                     
                     <div class="art-style-card" data-style="digital">
-                        <div class="art-preview digital"></div>
-                        <p>Digital Painting Vector Illustration</p>
-                    </div>
-                    
+                        <div class="art-preview">
+                            <img src="assets/images/styles/digitalpainting.png" alt="Digital Painting" class="style-image">
+                        </div>
+                        <p>Digital Painting</p>
+                            </div>
+                            
                     <div class="art-style-card" data-style="pen-ink">
-                        <div class="art-preview pen-ink"></div>
-                        <p>Pen and Ink with Color Washes</p>
-                    </div>
+                        <div class="art-preview">
+                            <img src="assets/images/styles/penandink.png" alt="Pen and Ink" class="style-image">
+                                    </div>
+                        <p>Pen and Ink</p>
+                                </div>
                     
                     <div class="art-style-card" data-style="collage">
-                        <div class="art-preview collage"></div>
-                        <p>Collage Mixed Media</p>
-                    </div>
-                    
+                        <div class="art-preview">
+                            <img src="assets/images/styles/collage.png" alt="Collage Mixed Media" class="style-image">
+                        </div>
+                        <p>Mixed Media Collage</p>
+                        </div>
+                        
                     <div class="art-style-card" data-style="3d">
-                        <div class="art-preview threed"></div>
+                        <div class="art-preview">
+                            <img src="assets/images/styles/3d.png" alt="3D Rendering" class="style-image">
+                        </div>
                         <p>3D Rendering</p>
                     </div>
                 </div>
-                
-                <button class="next-button" onclick="generateStory()">
-                    Generate Story
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 5L19 12L12 19" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </button>
+                <!-- End Moved Content -->
+
+                <div class="button-container"> <!-- Button Container -->
+                    <button class="back-button" onclick="navigateToStep('step-4-cognitive')">Back</button>
+                    <button class="next-button" onclick="navigateToStep('step-6-customize')">Next</button>
+                </div>
             </div>
             
-            <div id="story-result" class="content-panel" style="display: none;">
-                <div class="book-container">
-                    <div class="book-cover">
-                        <h2 id="story-title">Alexander's Adventure</h2>
-                    </div>
-                    
-                    <div class="book-pages">
-                        <div class="book-page left-page">
-                            <div id="page-number" class="page-number">1</div>
-                            <div class="page-content" id="story-text">
-                                Your story will appear here...
+            <!-- Step 6: Customize Story & Select Characters -->
+            <div id="step-6-customize" class="content-panel workflow-step">
+                <h1>A few more details to tailor it a bit more</h1>
+                <p class="subtitle">Choose the characters for this story and add any specific requests.</p>
+
+                <div class="customize-container-vertical"> 
+                    <div class="customize-section">
+                        <h3>Choose the avatars for this story</h3>
+                        <div class="character-selection-grid" id="story-character-selection-grid">
+                            <!-- Character cards for selection will be populated here by JS -->
+                            <!-- Example Structure (to be generated by JS): -->
+                            <!-- 
+                            <div class="character-select-card active" data-char-id="avatar-1">
+                                <div class="char-select-img-container">
+                                    <img src="samplebooks/1.png" alt="Avatar Name" class="char-select-img">
+                                </div>
+                                <div class="char-select-info">
+                                    <span class="char-select-name">Rick</span>
+                                    <span class="char-select-desc">Main Avatar</span> 
+                                </div>
+                            </div>
+                            <div class="character-select-card" data-char-id="char-jumbo">
+                                <div class="char-select-img-container">
+                                    <img src="samplebooks/2.png" alt="Jumbo" class="char-select-img">
+                                </div>
+                                <div class="char-select-info">
+                                    <span class="char-select-name">Jumbo</span>
+                                    <span class="char-select-desc">Bearded Collie</span> 
+                                </div>
+                            </div> 
+                            -->
+                            <div class="character-select-card add-new-char-card" id="add-new-story-character-btn">
+                                <div class="add-new-char-icon">+</div>
+                                <div class="char-select-info">
+                                    <span class="char-select-name">Add a new one</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="book-page right-page">
-                            <div class="page-illustration">
-                                <img id="story-illustration" src="" alt="Story illustration">
+                        </div>
+                        
+                    <div class="customize-section">
+                        <h3>Additional information you may want to include</h3>
+                        <div class="form-group">
+                            <textarea id="custom-prompt" placeholder="E.g., Amina loves everything related with the space and dragons." class="text-input custom-prompt" rows="4"></textarea>
+                            <small>Include specific themes, settings, plot points, or things to avoid.</small>
+                        </div>
+                                    </div>
+                                </div>
+                                
+                <div class="button-container"> 
+                    <button class="back-button" onclick="navigateToStep('step-5-illustration')">Back</button>
+                    <button class="next-button" onclick="navigateToStep('step-6b-confirmation')">Next</button> 
+                                    </div>
+                                </div>
+                                
+            <!-- Step 6b: Confirmation Summary -->
+            <div id="step-6b-confirmation" class="content-panel workflow-step">
+                <h1>Story Details Confirmation</h1>
+                <p class="subtitle">Review your story details before we generate your book.</p>
+                
+                <div class="confirmation-container">
+                    <div class="confirmation-section">
+                        <h3>Child Information</h3>
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Name:</span>
+                            <span class="confirmation-value" id="confirm-name"></span>
+                                    </div>
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Age:</span>
+                            <span class="confirmation-value" id="confirm-age"></span>
+                                </div>
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Gender:</span>
+                            <span class="confirmation-value" id="confirm-gender"></span>
+                        </div>
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Interests:</span>
+                            <span class="confirmation-value" id="confirm-interests"></span>
+                                </div>
                             </div>
+                    
+                    <div class="confirmation-section">
+                        <h3>Story Elements</h3>
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Cognitive Focus:</span>
+                            <span class="confirmation-value" id="confirm-cognitive"></span>
+                        </div>
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Illustration Style:</span>
+                            <span class="confirmation-value" id="confirm-style"></span>
+                        </div>
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Story Length:</span>
+                            <span class="confirmation-value" id="confirm-length"></span>
+                </div>
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Story Type:</span>
+                            <span class="confirmation-value" id="confirm-type"></span>
+            </div>
+        </div>
+                    
+                    <div class="confirmation-section">
+                        <h3>Avatar & Characters</h3>
+                        <!-- Add display for selected characters -->
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Characters in Story:</span>
+                            <span class="confirmation-value" id="confirm-characters"></span>
+                        </div>
+                        <!-- Potentially add more avatar details like skin tone if needed -->
+                        <!-- 
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Avatar Skin Tone:</span>
+                            <span class="confirmation-value" id="confirm-avatar-skin"></span>
+                        </div>
+                        -->
+                    </div>
+
+                    <div class="confirmation-section">
+                        <h3>Custom Requests</h3>
+                        <!-- Add display for custom prompt -->
+                        <div class="confirmation-row">
+                            <span class="confirmation-label">Notes:</span>
+                            <span class="confirmation-value" id="confirm-custom-prompt"></span>
                         </div>
                     </div>
+                </div>
+                
+                <div class="prompt-preview">
+                    <div class="prompt-header">
+                        <h3>This will generate a story with the following structured prompt:</h3>
+                        <button id="edit-prompt-button" class="link-button edit-prompt-btn">Edit</button>
+                    </div>
+                    <div class="prompt-box" id="structured-prompt">
+                        <!-- Generated structured prompt will be displayed here -->
+                        Generating prompt...
+                    </div>
+                    <textarea id="prompt-edit-textarea" class="text-input prompt-edit-area" style="display: none;"></textarea>
+                    <button id="save-prompt-button" class="next-button save-prompt-btn" style="display: none;">Save Prompt</button>
+                </div>
+
+                <div class="button-container"> <!-- Button Container -->
+                    <button class="back-button" onclick="navigateToStep('step-6-customize')">Back to Edit</button>
+                    <button class="next-button" onclick="navigateToStep('step-7-login')">Proceed to Login</button>
+                </div>
+            </div>
+            
+            <!-- Step 7: Account Creation / Login -->
+            <div id="step-7-login" class="content-panel workflow-step login-page-container">
+                <!-- New Login/Signup Design -->
+                <div class="login-form-minimal">
+                    <h1>Create an account</h1>
+                    <p class="subtitle">Enter your email to sign up for this app</p>
                     
-                    <div class="book-details-wrapper">
-                        <div class="story-details">
-                            <h3>Characters</h3>
-                            <div id="character-profiles" class="character-profiles">
-                                <!-- Populated by JavaScript -->
+                    <div class="form-group">
+                        <input type="email" id="signup-email" placeholder="email@domain.com" class="text-input" aria-label="Email address">
+                    </div>
+                    
+                    <button id="signup-email-button" class="login-btn primary full-width">Sign up with email</button>
+                    
+                    <div class="login-divider"><span>or continue with</span></div>
+                    
+                    <button id="google-signin-button" class="login-btn social-btn google-btn full-width">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" class="social-icon"> 
+                        Google
+                    </button>
+                    
+                    <p class="login-terms-minimal">By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+                    
+                    <div class="login-switch">
+                        Already have an account? <button id="switch-to-login-btn" class="link-button">Log in</button>
+                    </div>
+                    
+                    <!-- Demo Account Button (Optional) -->
+                     <button id="dev-pass-button-minimal" class="link-button dev-pass-link">Continue with Demo Account</button>
+                </div>
+                <!-- End New Login/Signup Design -->
+                
+                <!-- Add a button container for Back button if needed in workflow -->
+                <div class="button-container">
+                     <button class="back-button" onclick="navigateToStep('step-6b-confirmation')">Back</button>
+                     <!-- No Next button here, handled by signup/login actions -->
+                 </div>
+            </div>
+            
+            <!-- Step 8: Preview the Book -->
+            <div id="step-8-preview" class="content-panel workflow-step">
+                <h1>Preview Your Book</h1>
+                <p class="subtitle">Here's a sneak peek of your story (4-5 pages).</p>
+                
+                <div id="book-preview-area">
+                    <!-- Preview content will be injected here by JS -->
+                    <div class="preview-placeholder">Generating preview...</div>
+                </div>
+                
+                <div class="preview-controls">
+                    <button id="regenerate-preview-button" class="preview-btn regenerate">Regenerate Preview</button>
+                    <div class="preview-pagination">
+                        <button id="preview-prev-button" class="preview-btn nav" disabled>&larr; Previous</button>
+                        <span id="preview-page-indicator">Page X of Y</span>
+                        <button id="preview-next-button" class="preview-btn nav" disabled>Next &rarr;</button>
+            </div>
+        </div>
+
+                <div class="button-container"> <!-- Button Container -->
+                    <button class="back-button" onclick="navigateToStep('step-7-login')">Back</button> 
+                    <button class="next-button" onclick="navigateToStep('step-9-purchase')">Looks Good! Proceed</button>
+                </div>
+            </div>
+            
+            <!-- Step 9: Purchase Options -->
+            <div id="step-9-purchase" class="content-panel workflow-step">
+                <h1>Unlock Your Full Story</h1>
+                <p class="subtitle">Choose an option to access the complete book.</p>
+                
+                <div class="purchase-options-container">
+                    <div class="purchase-option">
+                        <h3>One-Time Purchase</h3>
+                        <p class="price">$9.99</p>
+                        <p class="description">Get lifetime access to this generated book.</p>
+                        <button id="purchase-one-time-btn" class="purchase-btn primary">
+                            <i class="fa-solid fa-book"></i> Purchase This Book
+                        </button>
+                    </div>
+                    <div class="purchase-option">
+                        <h3>Subscription</h3>
+                        <p class="price">$X.XX / month</p> <!-- Placeholder price -->
+                        <p class="description">Unlimited access to all generated books & new stories.</p>
+                        <button id="purchase-subscription-btn" class="purchase-btn secondary">
+                             <i class="fa-solid fa-infinity"></i> Subscribe Now
+                        </button>
+                            </div>
                             </div>
                             
-                            <h3>Cognitive Development Goals</h3>
-                            <div id="cognitive-details" class="cognitive-details">
-                                <!-- Populated by JavaScript -->
+                <div class="button-container"> <!-- Button Container -->
+                    <button class="back-button" onclick="navigateToStep('step-8-preview')">Back to Preview</button>
+                    <!-- Removed direct Complete Purchase button -->
                             </div>
                         </div>
                         
-                        <div class="story-controls-wrapper">
-                            <div class="pagination-controls">
-                                <button id="prev-page" class="page-nav-btn" disabled>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M15 18l-6-6 6-6"></path>
-                                    </svg>
-                                </button>
-                                <button id="next-page" class="page-nav-btn">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M9 18l6-6-6-6"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            
-                            <div class="story-controls">
-                                <button class="read-now-button">Read Now</button>
-                                <button class="save-button" onclick="saveToLibrary()">Save to Library</button>
-                                <button class="create-new-button" id="create-new-story">Create New Story</button>
-                            </div>
-                            
-                            <div class="book-action-buttons">
-                                <button class="book-action-btn listen" onclick="toggleAudio(event)">
-                                    <span class="btn-label">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                        </svg>
-                                        Listen
-                                    </span>
-                                </button>
-                                <button class="book-action-btn export" onclick="exportToPDF()">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>
-                                        <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"></path>
-                                        <path d="M12 17v-6"></path>
-                                        <path d="M9 14l3 3 3-3"></path>
-                                    </svg>
-                                    Export
-                                </button>
-                            </div>
-                        </div>
+            <!-- Step 10: Accessing the Library/Home -->
+            <div id="step-10-library" class="content-panel workflow-step">
+                <div class="library-header">
+                    <div class="library-title">
+                        <h1>Library of books</h1>
+                        <p class="subtitle">The books your kid has read.</p>
                     </div>
-                </div>
-            </div>
-            
-            <div id="library-view" class="content-panel" style="display: none;">
-                <h1>Your Library</h1>
-                <p class="subtitle">All your saved stories in one place</p>
-                
-                <div id="library-empty" style="text-align: center; padding: 3rem 0;">
-                    <h3>Your library is empty</h3>
-                    <p>Create a story to get started!</p>
-                    <button class="primary-button" onclick="showMainPage()">Create a Story</button>
+                    <button class="add-book-btn">Add a book</button>
                 </div>
                 
-                <div id="library-grid" class="library-grid">
-                    <!-- Populated by JavaScript -->
+                <!-- Tab Controls -->
+                <div class="tab-controls">
+                    <button class="tab-button active" data-tab="library-content">Library</button>
+                    <button class="tab-button" data-tab="avatars-characters-content">Avatars & Characters</button>
+                    <button class="tab-button" data-tab="dashboard-content">Dashboard</button>
                 </div>
-            </div>
-            
-            <!-- Dashboard View -->
-            <div id="dashboard-view" class="content-panel" style="display: none;">
-                <h1>Your Dashboard</h1>
-                <p class="subtitle">Track your child's cognitive development progress</p>
                 
-                <div class="dashboard-grid">
-                    <div class="dashboard-card stats-card">
-                        <h3>Your Stats</h3>
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <div class="stat-value" id="total-books">0</div>
-                                <div class="stat-label">Total Books</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value" id="characters-created">0</div>
-                                <div class="stat-label">Characters</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value" id="favorite-style">-</div>
-                                <div class="stat-label">Favorite Style</div>
-                            </div>
+                <!-- Tab Content Areas -->
+                <div class="tab-content active" id="library-content">
+                    <div id="library-empty" style="display: none;">
+                        <div class="empty-state-container">
+                            <div class="empty-state-icon">📚</div>
+                            <h3>Your library is empty</h3>
+                            <p>Create a story to get started with your first book!</p>
+                            <button class="primary-button" onclick="navigateToStep('step-1-landing')">Create a Story</button>
                         </div>
                     </div>
                     
-                    <div class="dashboard-card cognitive-progress-card">
-                        <h3>Cognitive Development Focus</h3>
-                        <div id="cognitive-progress" class="cognitive-progress">
-                            <!-- Will be populated by JavaScript -->
-                        </div>
-                    </div>
-                    
-                    <div class="dashboard-card recent-activity-card">
-                        <h3>Recent Activity</h3>
-                        <div id="recent-activity" class="recent-activity">
-                            <div class="empty-state">
-                                <p>No recent activity yet</p>
-                                <button class="primary-button small" onclick="showMainPage()">Create a Story</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="dashboard-card recommendations-card">
-                        <h3>Recommendations</h3>
-                        <div class="recommendations">
-                            <div class="recommendation-item">
-                                <div class="recommendation-icon">🧠</div>
-                                <div class="recommendation-content">
-                                    <h4>Problem Solving</h4>
-                                    <p>Try creating a story focused on problem-solving skills next to help develop critical thinking.</p>
+                    <div id="library-grid" class="modern-library-grid">
+                        <!-- Book cards will be dynamically populated here -->
+                        <div class="book-card">
+                            <div class="book-card-cover">
+                                <img src="samplebooks/1.png" alt="Book Cover">
+                                <div class="book-overlay">
+                                    <button class="read-book-btn">Read</button>
                                 </div>
                             </div>
-                            <div class="recommendation-item">
-                                <div class="recommendation-icon">🔤</div>
-                                <div class="recommendation-content">
-                                    <h4>Language Development</h4>
-                                    <p>Consider stories that introduce new vocabulary and language concepts.</p>
+                            <div class="book-card-info">
+                                <h3 class="book-title">Rick teaches a lesson</h3>
+                                <p class="book-desc">An executive function book for Rick to improve focus.</p>
+                            </div>
+                            <div class="book-card-meta">
+                                <span class="book-tag">Executive Function</span>
+                                <span class="book-date">May 12, 2023</span>
+                            </div>
+                        </div>
+                        
+                        <div class="book-card">
+                            <div class="book-card-cover">
+                                <img src="samplebooks/2.png" alt="Book Cover">
+                                <div class="book-overlay">
+                                    <button class="read-book-btn">Read</button>
+                                </div>
+                            </div>
+                            <div class="book-card-info">
+                                <h3 class="book-title">Amina's Feelings Day</h3>
+                                <p class="book-desc">An emotional regulation book for Amina to be more patient.</p>
+                            </div>
+                            <div class="book-card-meta">
+                                <span class="book-tag">Emotional Regulation</span>
+                                <span class="book-date">May 10, 2023</span>
+                            </div>
+                        </div>
+                        
+                        <div class="book-card">
+                            <div class="book-card-cover loading-book">
+                                <img src="samplebooks/3.png" alt="Book Cover">
+                                <div class="book-overlay">
+                                    <div class="book-loading">
+                                        <div class="loading-spinner-small"></div>
+                                        <span>Generating...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="book-card-info">
+                                <h3 class="book-title">Rick had a bad day</h3>
+                                <p class="book-desc">An emotional regulation book for Rick to deal with emotions.</p>
+                            </div>
+                            <div class="book-card-meta">
+                                <span class="book-tag">Emotional Regulation</span>
+                                <span class="book-date">Just now</span>
+                                </div>
+                            </div>
+                            
+                        <div class="book-card">
+                            <div class="book-card-cover">
+                                <img src="samplebooks/4.png" alt="Book Cover">
+                                <div class="book-overlay">
+                                    <button class="read-book-btn">Read</button>
+                                </div>
+                            </div>
+                            <div class="book-card-info">
+                                <h3 class="book-title">Amina meets Alice</h3>
+                                <p class="book-desc">A book to reflect on social skills for Amina.</p>
+                            </div>
+                            <div class="book-card-meta">
+                                <span class="book-tag">Social Skills</span>
+                                <span class="book-date">May 5, 2023</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="avatars-characters-content">
+                    <div class="avatars-section">
+                        <div class="avatars-header">
+                            <h2>Avatars</h2>
+                            <p class="subtitle">This will be the heroes of your stories</p>
+                            <button class="add-avatar-btn">Add an avatar</button>
+                        </div>
+                        
+                        <div class="avatars-grid">
+                            <div class="avatar-card">
+                                <div class="avatar-image">
+                                    <img src="samplebooks/2.png" alt="Amina Avatar" class="avatar-img">
+                                    </div>
+                                <div class="avatar-info">
+                                    <h3>Amina</h3>
+                                    <p>4 years old</p>
+                                </div>
+                            </div>
+                            
+                            <div class="avatar-card">
+                                <div class="avatar-image">
+                                    <img src="samplebooks/1.png" alt="Rick Avatar" class="avatar-img">
+                                </div>
+                                <div class="avatar-info">
+                                    <h3>Rick</h3>
+                                    <p>6 years old</p>
+                                </div>
+                            </div>
+                            
+                            <div class="avatar-card">
+                                <div class="avatar-image pet-avatar">
+                                    <img src="samplebooks/2.png" alt="Jumbo" class="avatar-img">
+                                </div>
+                                <div class="avatar-info">
+                                    <h3>Jumbo</h3>
+                                    <p>Bearded Collie</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div id="loading" style="display: none;">
-                <div class="loading-spinner"></div>
-                <p>Generating your story...</p>
+                
+                <div class="tab-content" id="dashboard-content">
+                    <div class="dashboard-container">
+                        <h2>Dashboard</h2>
+                        <p class="subtitle">Track your child's cognitive development progress</p>
+                        
+                        <div class="dashboard-grid">
+                            <div class="dashboard-card stats-card">
+                                <h3>Your Stats</h3>
+                                <div class="stats-grid">
+                                    <div class="stat-item">
+                                        <div class="stat-value" id="total-books">4</div>
+                                        <div class="stat-label">Total Books</div>
+                        </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value" id="characters-created">3</div>
+                                        <div class="stat-label">Characters</div>
+                            </div>
+                                    <div class="stat-item">
+                                        <div class="stat-value" id="favorite-style">Watercolor</div>
+                                        <div class="stat-label">Favorite Style</div>
+                            </div>
+                            </div>
+                        </div>
+                        
+                            <div class="dashboard-card cognitive-progress-card">
+                                <h3>Cognitive Development Focus</h3>
+                                <div id="cognitive-progress" class="cognitive-progress">
+                                    <div class="progress-item">
+                                        <div class="progress-label">Executive Function</div>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar-fill" style="width: 75%"></div>
+                    </div>
+                                        <div class="progress-value">75%</div>
+                                </div>
+                                    <div class="progress-item">
+                                        <div class="progress-label">Emotional Regulation</div>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar-fill" style="width: 60%"></div>
+                                </div>
+                                        <div class="progress-value">60%</div>
+                                    </div>
+                                    <div class="progress-item">
+                                        <div class="progress-label">Social Skills</div>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar-fill" style="width: 25%"></div>
+                                        </div>
+                                        <div class="progress-value">25%</div>
+                                    </div>
+                                </div>
+                                </div>
+                                
+                            <div class="dashboard-card recommendations-card">
+                                <h3>Recommendations</h3>
+                                <div class="recommendations">
+                                    <div class="recommendation-item">
+                                        <div class="recommendation-icon">💡</div>
+                                        <div class="recommendation-content">
+                                            <h4>Problem Solving</h4>
+                                            <p>Try creating a story focused on problem-solving skills next to help develop critical thinking.</p>
+                                        </div>
+                                    </div>
+                                    <div class="recommendation-item">
+                                        <div class="recommendation-icon">🔤</div>
+                                        <div class="recommendation-content">
+                                            <h4>Language Development</h4>
+                                            <p>Consider stories that introduce new vocabulary and language concepts.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Error Modal -->
-    <div id="error-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="close-modal" onclick="document.getElementById('error-modal').style.display='none'">&times;</span>
+            <!-- Loading Indicator -->
+            <div id="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Working...</p>
             </div>
-            <div id="error-content" class="modal-body">
-                <!-- Error message will be inserted here -->
-            </div>
-            <div class="modal-footer">
-                <button onclick="document.getElementById('error-modal').style.display='none'" class="modal-button">Close</button>
+            
+            <!-- Error Modal -->
+            <div id="error-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span class="close-modal" onclick="document.getElementById('error-modal').style.display='none'">&times;</span>
+                    </div>
+                    <div id="error-content" class="modal-body">
+                        <!-- Error message will be inserted here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button onclick="document.getElementById('error-modal').style.display='none'" class="modal-button">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="script.js"></script>
-    <script>
-        // Initialize with user preferences when the DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Apply saved preferences
-            if (typeof applyUserPreferences === 'function') {
-                applyUserPreferences();
-            }
-        });
-    </script>
 </body>
 </html> 
